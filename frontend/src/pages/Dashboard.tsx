@@ -24,14 +24,6 @@ function buildStats(modules: Module[], queue: PracticeQueueItem[]): UserStats {
   };
 }
 
-const INITIAL_STATS: UserStats = {
-  exercisesCompleted: 0,
-  totalPoints: 0,
-  streakDays: 0,
-  modulesUnlocked: 0,
-  practiceQueueSize: 0,
-};
-
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export default function Dashboard() {
@@ -73,9 +65,7 @@ export default function Dashboard() {
 
   const hasPracticeQueue = practiceQueue.length > 0;
   // Group by lessonId to link the drill CTA to the first pending lesson
-  const firstQueuedLessonId = hasPracticeQueue
-    ? practiceQueue[0]?.lessonId
-    : null;
+  const firstQueuedLessonId = hasPracticeQueue ? practiceQueue[0]?.exercise.lessonId : null;
 
   return (
     <main className={styles.page}>
@@ -100,14 +90,18 @@ export default function Dashboard() {
 
       {/* ── Stats ── */}
       <section className={styles.section} aria-labelledby="stats-heading">
-        <h2 id="stats-heading" className={styles.sectionTitle}>Tu progreso</h2>
+        <h2 id="stats-heading" className={styles.sectionTitle}>
+          Tu progreso
+        </h2>
         <StatsGrid stats={stats} />
       </section>
 
       {/* ── Practice queue CTA ── */}
       {hasPracticeQueue && firstQueuedLessonId && (
         <section className={styles.section} aria-labelledby="queue-heading">
-          <h2 id="queue-heading" className={styles.sectionTitle}>Cola de practica</h2>
+          <h2 id="queue-heading" className={styles.sectionTitle}>
+            Cola de practica
+          </h2>
           <Card
             title="Tienes ejercicios pendientes de repaso"
             description="El sistema de repeticion espaciada ha seleccionado ejercicios para reforzar tu memoria a largo plazo."
@@ -117,10 +111,7 @@ export default function Dashboard() {
                 <strong>{practiceQueue.length}</strong> ejercicio
                 {practiceQueue.length !== 1 ? 's' : ''} en cola
               </p>
-              <Button
-                onClick={() => navigate(`/drill/${firstQueuedLessonId}`)}
-                size="md"
-              >
+              <Button onClick={() => navigate(`/drill/${firstQueuedLessonId}`)} size="md">
                 Empezar repaso
               </Button>
             </div>
@@ -130,7 +121,9 @@ export default function Dashboard() {
 
       {/* ── Modules grid ── */}
       <section className={styles.section} aria-labelledby="modules-heading">
-        <h2 id="modules-heading" className={styles.sectionTitle}>Modulos</h2>
+        <h2 id="modules-heading" className={styles.sectionTitle}>
+          Modulos
+        </h2>
         {modules.length === 0 ? (
           <p className={styles.emptyText}>No hay modulos disponibles aun.</p>
         ) : (

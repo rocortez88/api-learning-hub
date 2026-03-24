@@ -40,7 +40,7 @@ export interface Exercise {
   starterCode: string | null;
   difficulty: Difficulty;
   points: number;
-  hints: string[];  // Array de 3 pistas
+  hints: string[];
   order: number;
 }
 
@@ -88,14 +88,26 @@ export interface UserStats {
   practiceQueueSize: number;
 }
 
-// ─── Practice queue ────────────────────────────────────────────────────────────
+// ─── Practice queue ───────────────────────────────────────────────────────────
+// Refleja la estructura real del backend: /practice/queue devuelve
+// { data: PracticeQueueItem[], total: number }
 
 export interface PracticeQueueItem {
-  exerciseId: string;
-  lessonId: string;
+  srId: string;
   nextReviewAt: string;
   intervalDays: number;
   repetitions: number;
+  exercise: {
+    id: string;
+    lessonId: string;
+    type: ExerciseType;
+    prompt: string;
+    starterCode: string | null;
+    difficulty: Difficulty;
+    points: number;
+    hints: string[];
+    order: number;
+  };
 }
 
 // ─── Module with lessons ───────────────────────────────────────────────────────

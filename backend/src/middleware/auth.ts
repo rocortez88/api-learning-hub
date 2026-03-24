@@ -4,7 +4,7 @@ import { env } from '../config/env.js';
 import { AppError } from './errorHandler.js';
 
 export interface JwtPayload {
-  sub: string;   // user id
+  sub: string; // user id
   role: 'student' | 'admin';
   iat: number;
   exp: number;
@@ -12,6 +12,7 @@ export interface JwtPayload {
 
 // Extender Request de Express para incluir el usuario autenticado
 declare global {
+  // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace Express {
     interface Request {
       user?: JwtPayload;
@@ -23,7 +24,7 @@ export function requireAuth(req: Request, _res: Response, next: NextFunction): v
   const authHeader = req.headers.authorization;
 
   if (!authHeader?.startsWith('Bearer ')) {
-    throw new AppError(401, 'Token de autenticacion requerido', 'UNAUTHORIZED');
+    return next(new AppError(401, 'Token de autenticacion requerido', 'UNAUTHORIZED'));
   }
 
   const token = authHeader.slice(7);
@@ -33,17 +34,17 @@ export function requireAuth(req: Request, _res: Response, next: NextFunction): v
     req.user = payload;
     next();
   } catch {
-    throw new AppError(401, 'Token invalido o expirado', 'INVALID_TOKEN');
+    next(new AppError(401, 'Token invalido o expirado', 'INVALID_TOKEN'));
   }
 }
 
 export function requireRole(role: 'admin') {
   return (req: Request, _res: Response, next: NextFunction): void => {
     if (!req.user) {
-      throw new AppError(401, 'No autenticado', 'UNAUTHORIZED');
+      return next(new AppError(401, 'No autenticado', 'UNAUTHORIZED'));
     }
     if (req.user.role !== role) {
-      throw new AppError(403, 'Acceso no autorizado', 'FORBIDDEN');
+      return next(new AppError(403, 'Acceso no autorizado', 'FORBIDDEN'));
     }
     next();
   };

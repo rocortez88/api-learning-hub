@@ -1,0 +1,14 @@
+#!/bin/sh
+# Pre-commit hook — API Learning Hub
+# Ejecuta lint-staged en archivos staged + typecheck
+
+echo "🔍 Pre-commit: lint-staged..."
+npx lint-staged || exit 1
+
+echo "📐 Pre-commit: typecheck backend..."
+npm run typecheck --prefix backend || exit 1
+
+echo "📐 Pre-commit: typecheck frontend..."
+npm run typecheck --prefix frontend || exit 1
+
+echo "✅ Pre-commit OK"

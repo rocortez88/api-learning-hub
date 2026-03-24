@@ -4,7 +4,7 @@
  * Estrategia de DB:
  *   - Las variables de entorno (DATABASE_URL=:memory:) ya estan fijadas
  *     por env.setup.ts, que vitest ejecuta antes de cargar cualquier modulo.
- *   - Al importar db/index.js con DATABASE_URL=':memory:', better-sqlite3
+ *   - Al importar db/index.js con DATABASE_URL=:memory:, better-sqlite3
  *     abre una base de datos en memoria.
  *   - Ejecutamos el SQL de migracion sobre esa conexion para crear las tablas.
  *   - Exportamos la misma instancia `db` que usan los servicios, de modo que
@@ -139,9 +139,9 @@ export async function registerAndLogin(
   }
 
   return {
-    accessToken:  res.body.accessToken  as string,
-    refreshToken: res.body.refreshToken as string,
-    userId:       res.body.user.id      as string,
+    accessToken:  res.body.data.accessToken  as string,
+    refreshToken: res.body.data.refreshToken as string,
+    userId:       res.body.data.user.id      as string,
   };
 }
 

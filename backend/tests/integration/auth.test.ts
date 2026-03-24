@@ -26,13 +26,13 @@ describe('POST /api/auth/register', () => {
       .send({ email: 'alice@example.com', username: 'alice', password: 'Password123!' });
 
     expect(res.status).toBe(201);
-    expect(res.body).toHaveProperty('accessToken');
-    expect(res.body).toHaveProperty('refreshToken');
-    expect(res.body).toHaveProperty('user');
-    expect(res.body.user).not.toHaveProperty('passwordHash');
-    expect(res.body.user).not.toHaveProperty('password_hash');
-    expect(res.body.user.email).toBe('alice@example.com');
-    expect(res.body.user.username).toBe('alice');
+    expect(res.body.data).toHaveProperty('accessToken');
+    expect(res.body.data).toHaveProperty('refreshToken');
+    expect(res.body.data).toHaveProperty('user');
+    expect(res.body.data.user).not.toHaveProperty('passwordHash');
+    expect(res.body.data.user).not.toHaveProperty('password_hash');
+    expect(res.body.data.user.email).toBe('alice@example.com');
+    expect(res.body.data.user.username).toBe('alice');
   });
 
   it('devuelve 409 si el email ya existe', async () => {
@@ -97,8 +97,8 @@ describe('POST /api/auth/login', () => {
       .send({ email: 'dave@example.com', password: 'Password123!' });
 
     expect(res.status).toBe(200);
-    expect(res.body).toHaveProperty('accessToken');
-    expect(res.body).toHaveProperty('refreshToken');
+    expect(res.body.data).toHaveProperty('accessToken');
+    expect(res.body.data).toHaveProperty('refreshToken');
   });
 
   it('devuelve 401 con mensaje generico si el email no existe', async () => {
@@ -175,8 +175,8 @@ describe('POST /api/auth/refresh', () => {
       .send({ refreshToken });
 
     expect(res.status).toBe(200);
-    expect(res.body).toHaveProperty('accessToken');
-    expect(res.body).toHaveProperty('refreshToken');
+    expect(res.body.data).toHaveProperty('accessToken');
+    expect(res.body.data).toHaveProperty('refreshToken');
   });
 
   it('devuelve 401 si el refreshToken es un JWT invalido', async () => {

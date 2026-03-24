@@ -21,9 +21,7 @@ interface AttemptResult {
 
 type DrillPhase = 'loading' | 'empty' | 'active' | 'summary';
 
-interface DrillExercise extends Exercise {
-  // Exercise already has all we need
-}
+type DrillExercise = Exercise;
 
 interface DrillResult {
   exerciseId: string;
@@ -63,9 +61,7 @@ function parseQuizOptions(starterCode: string | null): string[] {
   }
 }
 
-type FillSegment =
-  | { blank: false; text: string }
-  | { blank: true; index: number };
+type FillSegment = { blank: false; text: string } | { blank: true; index: number };
 
 function parseFillSegments(code: string): FillSegment[] {
   const MARKER = '___BLANK___';
@@ -185,9 +181,7 @@ interface TextareaViewProps {
 function TextareaView({ value, onChange, disabled, starterCode }: TextareaViewProps) {
   return (
     <div className={styles.textareaWrapper}>
-      {starterCode && (
-        <pre className={styles.starterCode}>{starterCode}</pre>
-      )}
+      {starterCode && <pre className={styles.starterCode}>{starterCode}</pre>}
       <textarea
         className={styles.codeTextarea}
         value={value}
@@ -278,22 +272,8 @@ export default function DrillPage() {
           return;
         }
 
-        // Fetch full exercise data for each queued item
-        const exerciseRequests = queueItems
-          .filter((item) => /^\d+$/.test(item.exerciseId))
-          .map((item) =>
-            apiClient
-              .get<ApiResponse<Exercise>>(`/exercises/${item.exerciseId}`)
-              .then((r) => r.data.data)
-              .catch(() => null),
-          );
-
-        const results = await Promise.all(exerciseRequests);
-        if (cancelled) return;
-
-        const loaded: DrillExercise[] = results.filter(
-          (ex): ex is DrillExercise => ex !== null,
-        );
+        // Queue items already include full exercise data — no extra fetch needed
+        const loaded: DrillExercise[] = queueItems.map((item) => item.exercise);
 
         if (loaded.length === 0) {
           setPhase('empty');
@@ -318,7 +298,6 @@ export default function DrillPage() {
       stopTimer();
       if (autoAdvanceRef.current) clearTimeout(autoAdvanceRef.current);
     };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // ── Reset answer state for a given exercise ──
@@ -334,7 +313,7 @@ export default function DrillPage() {
       return;
     }
 
-    if ((ex.type === 'fill_blank') && ex.starterCode) {
+    if (ex.type === 'fill_blank' && ex.starterCode) {
       const blanksCount = (ex.starterCode.match(/___BLANK___/g) ?? []).length;
       setFillAnswers(Array(blanksCount).fill(''));
     } else {
@@ -349,22 +328,18 @@ export default function DrillPage() {
   }
 
   // ── Advance to next exercise or summary ──
-  const advanceToNext = useCallback(
-    () => {
-      const nextIndex = currentIndex + 1;
-      if (nextIndex >= exercises.length) {
-        stopTimer();
-        setPhase('summary');
-        return;
-      }
-      setCurrentIndex(nextIndex);
-      const nextEx = exercises[nextIndex] ?? null;
-      resetAnswerState(nextEx);
-      startTimer();
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [currentIndex, exercises],
-  );
+  const advanceToNext = useCallback(() => {
+    const nextIndex = currentIndex + 1;
+    if (nextIndex >= exercises.length) {
+      stopTimer();
+      setPhase('summary');
+      return;
+    }
+    setCurrentIndex(nextIndex);
+    const nextEx = exercises[nextIndex] ?? null;
+    resetAnswerState(nextEx);
+    startTimer();
+  }, [currentIndex, exercises]);
 
   // ── Build submitted code ──
   function buildSubmittedCode(ex: DrillExercise): string {
@@ -397,10 +372,11 @@ export default function DrillPage() {
     setSubmitError(null);
 
     try {
-      const res = await apiClient.post<ApiResponse<AttemptResult>>(
-        `/exercises/${ex.id}/attempt`,
-        { submittedCode, timeSpentMs, hintUsedLevel: 0 },
-      );
+      const res = await apiClient.post<ApiResponse<AttemptResult>>(`/exercises/${ex.id}/attempt`, {
+        submittedCode,
+        timeSpentMs,
+        hintUsedLevel: 0,
+      });
 
       const attemptResult = res.data.data;
       setLastResult(attemptResult);
@@ -454,9 +430,7 @@ export default function DrillPage() {
 
   // ── Retry only failed exercises ──
   function handleRetryFailed() {
-    const failedIds = new Set(
-      sessionResults.filter((r) => !r.passed).map((r) => r.exerciseId),
-    );
+    const failedIds = new Set(sessionResults.filter((r) => !r.passed).map((r) => r.exerciseId));
     const failedExercises = exercises.filter((ex) => failedIds.has(ex.id));
     if (failedExercises.length === 0) return;
 
@@ -510,12 +484,13 @@ export default function DrillPage() {
     return (
       <main className={styles.page}>
         <div className={styles.emptyState}>
-          <span className={styles.emptyIcon} aria-hidden="true">🎉</span>
+          <span className={styles.emptyIcon} aria-hidden="true">
+            🎉
+          </span>
           <h2 className={styles.emptyTitle}>¡Cola vacía!</h2>
           <p className={styles.emptyDesc}>
-            No tienes ejercicios pendientes de repaso por ahora.
-            Completa más ejercicios para que el sistema de repetición espaciada
-            los añada automáticamente.
+            No tienes ejercicios pendientes de repaso por ahora. Completa más ejercicios para que el
+            sistema de repetición espaciada los añada automáticamente.
           </p>
           <Button onClick={() => navigate('/dashboard')} size="md">
             Ir al Dashboard
@@ -535,7 +510,9 @@ export default function DrillPage() {
 
           <div className={styles.summaryStats}>
             <div className={styles.summaryStat}>
-              <span className={styles.summaryStatValue}>{correctCount}/{totalExercises}</span>
+              <span className={styles.summaryStatValue}>
+                {correctCount}/{totalExercises}
+              </span>
               <span className={styles.summaryStatLabel}>Correctos</span>
             </div>
             <div className={styles.summaryStat}>
@@ -570,9 +547,7 @@ export default function DrillPage() {
 
   const quizOptions = parseQuizOptions(ex.starterCode);
   const fillSegments: FillSegment[] =
-    ex.type === 'fill_blank' && ex.starterCode
-      ? parseFillSegments(ex.starterCode)
-      : [];
+    ex.type === 'fill_blank' && ex.starterCode ? parseFillSegments(ex.starterCode) : [];
 
   const isObserve = ex.type === 'observe';
   const isFill = ex.type === 'fill_blank';
@@ -669,26 +644,18 @@ export default function DrillPage() {
           role="status"
           aria-live="polite"
         >
-          <p className={`${styles.feedbackTitle} ${passed ? styles.feedbackTitlePass : styles.feedbackTitleFail}`}>
+          <p
+            className={`${styles.feedbackTitle} ${passed ? styles.feedbackTitlePass : styles.feedbackTitleFail}`}
+          >
             {passed ? '¡Correcto!' : 'Incorrecto'}
           </p>
-          {passed && (
-            <p className={styles.feedbackPoints}>+{ex.points} pts</p>
-          )}
+          {passed && <p className={styles.feedbackPoints}>+{ex.points} pts</p>}
           {lastResult.attempt.result && !passed && (
             <p className={styles.feedbackMessage}>{lastResult.attempt.result}</p>
           )}
-          {passed && (
-            <p className={styles.feedbackAutoAdvance}>
-              Avanzando al siguiente...
-            </p>
-          )}
+          {passed && <p className={styles.feedbackAutoAdvance}>Avanzando al siguiente...</p>}
           {!passed && (
-            <Button
-              variant="secondary"
-              size="sm"
-              onClick={handleSkip}
-            >
+            <Button variant="secondary" size="sm" onClick={handleSkip}>
               Siguiente de todos modos
             </Button>
           )}

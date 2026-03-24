@@ -1,5 +1,4 @@
 import MonacoEditor from '@monaco-editor/react';
-import type { editor } from 'monaco-editor';
 
 export interface CodeEditorProps {
   value: string;
@@ -10,10 +9,10 @@ export interface CodeEditorProps {
   theme?: 'vs-dark' | 'light';
 }
 
-const DEFAULT_OPTIONS: editor.IStandaloneEditorConstructionOptions = {
+const DEFAULT_OPTIONS = {
   fontSize: 14,
   minimap: { enabled: false },
-  wordWrap: 'on',
+  wordWrap: 'on' as const,
   scrollBeyondLastLine: false,
   automaticLayout: true,
 };
