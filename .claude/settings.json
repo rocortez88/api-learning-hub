@@ -1,0 +1,17 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"/home/shadows/Documentos/web app api/scripts/security-hook.sh\"",
+            "timeout": 15,
+            "statusMessage": "Ejecutando security check..."
+          }
+        ]
+      }
+    ]
+  }
+}

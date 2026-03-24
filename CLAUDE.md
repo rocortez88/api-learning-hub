@@ -1,5 +1,64 @@
 # API Learning Hub — CLAUDE.md
 
+---
+
+## Protocolo Multi-Agente — OBLIGATORIO
+
+### Rol del Orquestador (sesion activa de Claude Code)
+
+El orquestador NO escribe codigo de negocio directamente. Su rol es:
+1. Planificar la tarea y dividirla en sub-tareas por agente
+2. Lanzar sub-agentes con el `Agent` tool para cada sub-tarea
+3. Revisar los resultados de cada sub-agente antes de continuar
+4. Coordinar dependencias entre agentes
+
+### Regla de oro: ningun modulo se integra sin pasar por Seguridad y Tests
+
+```
+Para cada modulo nuevo:
+  1. Sub-agente Backend  → implementa schema + service + routes
+  2. Sub-agente Seguridad → /security-review de los archivos creados
+  3. Sub-agente Tests     → escribe y ejecuta tests de integracion
+  4. Orquestador          → registra en app.ts SOLO si 2 y 3 pasan
+```
+
+### Protocolo de lanzamiento de sub-agentes
+
+Cuando el orquestador usa el `Agent` tool, el prompt DEBE incluir:
+- Rol exacto del agente (`Eres el Agente de Seguridad / Backend / Tests / DB`)
+- Archivos relevantes que debe leer antes de actuar
+- Criterio de exito claro (que debe devolver al orquestador)
+- Restriccion: NO modificar archivos fuera de su dominio
+
+### Agentes disponibles y su dominio
+
+| Agente | Dominio | Skill |
+|--------|---------|-------|
+| Backend/API | `src/modules/**` | `/create-module` |
+| Seguridad | Audit de cualquier `.ts` | `/security-review` |
+| Tests | `tests/**` | `/run-tests` |
+| DB | `src/db/**` | — |
+| Frontend | `frontend/src/**` | — |
+| DevOps | `docker-compose.yml`, `.github/**` | — |
+
+### Hooks de seguridad activos
+
+Cada vez que se escribe o edita un archivo `.ts`, el hook PostToolUse ejecuta
+`scripts/security-hook.sh` automaticamente. Si detecta un problema, **bloquea**
+la operacion con `decision: block`. El agente debe corregir antes de continuar.
+
+Los 8 controles automaticos son:
+1. Secretos hardcodeados en variables sensibles
+2. JWT_SECRET / DATABASE_URL literales en codigo
+3. CORS con `origin: '*'`
+4. SQL injection por interpolacion directa de req.body/params/query
+5. `eval()` o `new Function()`
+6. `console.log` con passwords/tokens/secrets
+7. bcrypt con menos de 10 rounds
+8. `throw "string"` en lugar de `AppError`
+
+---
+
 ## Descripcion del Proyecto
 
 Aplicacion web educativa e interactiva para aprender APIs desde cero hasta nivel avanzado.
