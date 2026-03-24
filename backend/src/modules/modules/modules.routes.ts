@@ -60,7 +60,7 @@ modulesRouter.get(
   requireAuth,
   (req: Request, res: Response, next: NextFunction) => {
     try {
-      const data = modulesService.getAllModules();
+      const data = modulesService.getAllModulesForUser(req.user!.sub);
       res.status(200).json({ data });
     } catch (err) {
       next(err);
@@ -150,7 +150,7 @@ modulesRouter.get(
   validate(moduleParamsSchema, 'params'),
   (req: Request, res: Response, next: NextFunction) => {
     try {
-      const data = modulesService.getModuleBySlug(req.params['slug'] ?? '');
+      const data = modulesService.getModuleBySlugForUser(req.params['slug'] ?? '', req.user!.sub);
       res.status(200).json({ data });
     } catch (err) {
       next(err);
