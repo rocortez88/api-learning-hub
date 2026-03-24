@@ -1,7 +1,9 @@
 import { Router } from 'express';
 import type { Request, Response, NextFunction } from 'express';
 import { requireAuth } from '../../middleware/auth.js';
+import { validate } from '../../middleware/validate.js';
 import * as exercisesService from './exercises.service.js';
+import { exerciseParamsSchema } from './exercises.schema.js';
 
 export const exercisesRouter = Router();
 
@@ -96,6 +98,7 @@ export const exercisesRouter = Router();
 exercisesRouter.get(
   '/:id',
   requireAuth,
+  validate(exerciseParamsSchema, 'params'),
   (req: Request, res: Response, next: NextFunction) => {
     try {
       const data = exercisesService.getExerciseById(req.params['id'] ?? '');

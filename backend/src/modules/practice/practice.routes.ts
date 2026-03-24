@@ -1,7 +1,9 @@
 import { Router } from 'express';
 import type { NextFunction, Request, Response } from 'express';
 import { requireAuth } from '../../middleware/auth.js';
-import { getPracticeQueue } from './practice.service.js';
+import { validate } from '../../middleware/validate.js';
+import { getPracticeQueue, getReviewItems } from './practice.service.js';
+import { reviewItemsQuerySchema, type ReviewItemsQuery } from './practice.schema.js';
 
 const router = Router();
 
@@ -81,6 +83,67 @@ router.get(
     try {
       const queue = getPracticeQueue(req.user!.sub);
       res.status(200).json(queue);
+    } catch (err) {
+      next(err);
+    }
+  },
+);
+
+/**
+ * @openapi
+ * /practice/review-items:
+ *   get:
+ *     summary: Get review items from the spaced repetition queue
+ *     description: >
+ *       Returns exercises due for review, with optional filtering by exerciseId
+ *       and a configurable limit (1–100, default 10).
+ *     tags:
+ *       - Práctica
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: exerciseId
+ *         required: false
+ *         schema:
+ *           type: string
+ *         description: Filter results to a specific exercise ID
+ *       - in: query
+ *         name: limit
+ *         required: false
+ *         schema:
+ *           type: integer
+ *           minimum: 1
+ *           maximum: 100
+ *           default: 10
+ *         description: Maximum number of review items to return
+ *     responses:
+ *       200:
+ *         description: Review items retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                 total:
+ *                   type: integer
+ *       400:
+ *         $ref: '#/components/responses/ValidationError'
+ *       401:
+ *         description: Unauthorized — missing or invalid token
+ */
+router.get(
+  '/review-items',
+  requireAuth,
+  validate(reviewItemsQuerySchema, 'query'),
+  (req: Request, res: Response, next: NextFunction): void => {
+    try {
+      const result = getReviewItems(req.user!.sub, req.query as unknown as ReviewItemsQuery);
+      res.status(200).json(result);
     } catch (err) {
       next(err);
     }

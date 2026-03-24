@@ -1,7 +1,9 @@
 import { Router } from 'express';
 import type { Request, Response, NextFunction } from 'express';
 import { requireAuth } from '../../middleware/auth.js';
+import { validate } from '../../middleware/validate.js';
 import * as modulesService from './modules.service.js';
+import { moduleParamsSchema } from './modules.schema.js';
 
 export const modulesRouter = Router();
 
@@ -145,6 +147,7 @@ modulesRouter.get(
 modulesRouter.get(
   '/:slug',
   requireAuth,
+  validate(moduleParamsSchema, 'params'),
   (req: Request, res: Response, next: NextFunction) => {
     try {
       const data = modulesService.getModuleBySlug(req.params['slug'] ?? '');
