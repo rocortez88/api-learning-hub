@@ -2,7 +2,7 @@ import { useEffect, useRef, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { apiClient } from '../api/client';
-import type { Exercise, Attempt, ApiResponse, PracticeQueueItem } from '../types';
+import type { Exercise, ApiResponse, PracticeQueueItem } from '../types';
 import { Spinner, Button, Badge } from '../components/ui';
 import { ProgressBar } from '../components/progress';
 import styles from './Drill.module.css';
@@ -15,7 +15,12 @@ const AUTO_ADVANCE_MS = 1500;
 // ─── Types ─────────────────────────────────────────────────────────────────
 
 interface AttemptResult {
-  attempt: Attempt;
+  attemptId: string;
+  passed: boolean;
+  result: string;
+  points: number;
+  nextReviewAt: string;
+  solution?: string;
   nextExerciseId?: string | null;
 }
 
@@ -382,7 +387,7 @@ export default function DrillPage() {
       setLastResult(attemptResult);
       stopTimer();
 
-      const passed = attemptResult.attempt.passed;
+      const passed = attemptResult.passed;
       const newResult: DrillResult = {
         exerciseId: ex.id,
         passed,
@@ -448,7 +453,7 @@ export default function DrillPage() {
   const ex = exercises[currentIndex] ?? null;
   const totalExercises = exercises.length;
   const progressPercent = totalExercises > 0 ? (currentIndex / totalExercises) * 100 : 0;
-  const passed = lastResult?.attempt.passed ?? false;
+  const passed = lastResult?.passed ?? false;
   const totalSessionMs = Date.now() - sessionStartRef.current;
   const failedCount = sessionResults.filter((r) => !r.passed).length;
   const correctCount = sessionResults.filter((r) => r.passed).length;
@@ -650,8 +655,8 @@ export default function DrillPage() {
             {passed ? '¡Correcto!' : 'Incorrecto'}
           </p>
           {passed && <p className={styles.feedbackPoints}>+{ex.points} pts</p>}
-          {lastResult.attempt.result && !passed && (
-            <p className={styles.feedbackMessage}>{lastResult.attempt.result}</p>
+          {lastResult.result && !passed && (
+            <p className={styles.feedbackMessage}>{lastResult.result}</p>
           )}
           {passed && <p className={styles.feedbackAutoAdvance}>Avanzando al siguiente...</p>}
           {!passed && (

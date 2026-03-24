@@ -18,6 +18,7 @@ export interface Module {
   unlockedByModuleId: string | null;
   isUnlocked?: boolean;
   progress?: number; // 0-100
+  createdAt: string;
 }
 
 export interface Lesson {
@@ -27,6 +28,7 @@ export interface Lesson {
   contentMd: string;
   order: number;
   type: 'theory' | 'demo' | 'exercise_set';
+  createdAt: string;
 }
 
 export type ExerciseType = 'quiz' | 'observe' | 'fill_blank' | 'build' | 'debug' | 'challenge';
@@ -49,6 +51,7 @@ export interface Exercise {
   hints: string[];
   order: number;
   validation?: ExerciseValidation;
+  createdAt: string;
 }
 
 export interface Attempt {
@@ -114,6 +117,7 @@ export interface PracticeQueueItem {
     points: number;
     hints: string[];
     order: number;
+    createdAt: string;
   };
 }
 

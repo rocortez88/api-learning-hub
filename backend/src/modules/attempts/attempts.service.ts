@@ -1,4 +1,4 @@
-import { eq, and } from 'drizzle-orm';
+import { eq, and, gt, asc } from 'drizzle-orm';
 import { db } from '../../db/index.js';
 import { exercises, attempts, spacedRepetition } from '../../db/schema.js';
 import { AppError } from '../../middleware/errorHandler.js';
@@ -41,8 +41,7 @@ function validateAnswer(
 ): { passed: boolean; result: string } {
   switch (logic.type) {
     case 'exact_match': {
-      const passed =
-        submittedCode.trim().toLowerCase() === logic.answer.trim().toLowerCase();
+      const passed = submittedCode.trim().toLowerCase() === logic.answer.trim().toLowerCase();
       return {
         passed,
         result: passed
@@ -52,9 +51,7 @@ function validateAnswer(
     }
 
     case 'includes_keywords': {
-      const text = logic.caseSensitive
-        ? submittedCode
-        : submittedCode.toLowerCase();
+      const text = logic.caseSensitive ? submittedCode : submittedCode.toLowerCase();
 
       const missingKeywords = logic.keywords.filter((kw) => {
         const keyword = logic.caseSensitive ? kw : kw.toLowerCase();
@@ -99,10 +96,7 @@ interface SM2Record {
   easeFactor: number;
 }
 
-function applySM2(
-  current: SM2Record,
-  quality: number,
-): SM2Record & { nextReviewAt: string } {
+function applySM2(current: SM2Record, quality: number): SM2Record & { nextReviewAt: string } {
   let { repetitions, intervalDays, easeFactor } = current;
 
   if (quality < 3) {
@@ -118,17 +112,12 @@ function applySM2(
       intervalDays = Math.round(intervalDays * easeFactor);
     }
 
-    easeFactor = Math.max(
-      1.3,
-      easeFactor + 0.1 - (5 - quality) * (0.08 + (5 - quality) * 0.02),
-    );
+    easeFactor = Math.max(1.3, easeFactor + 0.1 - (5 - quality) * (0.08 + (5 - quality) * 0.02));
 
     repetitions += 1;
   }
 
-  const nextReviewAt = new Date(
-    Date.now() + intervalDays * 24 * 60 * 60 * 1000,
-  ).toISOString();
+  const nextReviewAt = new Date(Date.now() + intervalDays * 24 * 60 * 60 * 1000).toISOString();
 
   return { repetitions, intervalDays, easeFactor, nextReviewAt };
 }
@@ -142,6 +131,7 @@ export interface AttemptResult {
   points: number;
   nextReviewAt: string;
   solution?: string;
+  nextExerciseId?: string | null;
 }
 
 export async function submitAttempt(
@@ -150,11 +140,7 @@ export async function submitAttempt(
   input: SubmitAttemptInput,
 ): Promise<AttemptResult> {
   // 1. Fetch exercise
-  const exercise = db
-    .select()
-    .from(exercises)
-    .where(eq(exercises.id, exerciseId))
-    .get();
+  const exercise = db.select().from(exercises).where(eq(exercises.id, exerciseId)).get();
 
   if (!exercise) {
     throw new AppError(404, 'Ejercicio no encontrado', 'EXERCISE_NOT_FOUND');
@@ -191,12 +177,7 @@ export async function submitAttempt(
   const existingSR = db
     .select()
     .from(spacedRepetition)
-    .where(
-      and(
-        eq(spacedRepetition.userId, userId),
-        eq(spacedRepetition.exerciseId, exerciseId),
-      ),
-    )
+    .where(and(eq(spacedRepetition.userId, userId), eq(spacedRepetition.exerciseId, exerciseId)))
     .get();
 
   const current: SM2Record = existingSR
@@ -246,6 +227,17 @@ export async function submitAttempt(
   if (passed) {
     response.solution = exercise.solution;
   }
+
+  // 6. Find next exercise in same lesson by order
+  const nextExercise = db
+    .select({ id: exercises.id })
+    .from(exercises)
+    .where(and(eq(exercises.lessonId, exercise.lessonId), gt(exercises.order, exercise.order)))
+    .orderBy(asc(exercises.order))
+    .limit(1)
+    .get();
+
+  response.nextExerciseId = nextExercise?.id ?? null;
 
   return response;
 }

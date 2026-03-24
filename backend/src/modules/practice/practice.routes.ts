@@ -76,18 +76,15 @@ const router = Router();
  *       401:
  *         description: Unauthorized — missing or invalid token
  */
-router.get(
-  '/queue',
-  requireAuth,
-  (req: Request, res: Response, next: NextFunction): void => {
-    try {
-      const queue = getPracticeQueue(req.user!.sub);
-      res.status(200).json(queue);
-    } catch (err) {
-      next(err);
-    }
-  },
-);
+router.get('/queue', requireAuth, (req: Request, res: Response, next: NextFunction): void => {
+  try {
+    const userId = req.user?.sub ?? '';
+    const queue = getPracticeQueue(userId);
+    res.status(200).json({ data: queue.data, meta: { total: queue.total } });
+  } catch (err) {
+    next(err);
+  }
+});
 
 /**
  * @openapi
@@ -142,8 +139,9 @@ router.get(
   validate(reviewItemsQuerySchema, 'query'),
   (req: Request, res: Response, next: NextFunction): void => {
     try {
-      const result = getReviewItems(req.user!.sub, req.query as unknown as ReviewItemsQuery);
-      res.status(200).json(result);
+      const userId = req.user?.sub ?? '';
+      const result = getReviewItems(userId, req.query as unknown as ReviewItemsQuery);
+      res.status(200).json({ data: result.data, meta: { total: result.total } });
     } catch (err) {
       next(err);
     }

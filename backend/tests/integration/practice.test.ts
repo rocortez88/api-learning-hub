@@ -40,7 +40,8 @@ describe('GET /api/practice/queue', () => {
     expect(res.body).toHaveProperty('data');
     expect(Array.isArray(res.body.data)).toBe(true);
     expect(res.body.data).toHaveLength(0);
-    expect(res.body).toHaveProperty('total', 0);
+    expect(res.body).toHaveProperty('meta');
+    expect(res.body.meta).toHaveProperty('total', 0);
   });
 
   it('devuelve 200 con el ejercicio en cola tras un intento fallido backdateado', async () => {
@@ -74,7 +75,7 @@ describe('GET /api/practice/queue', () => {
 
     expect(res.status).toBe(200);
     expect(res.body.data).toHaveLength(1);
-    expect(res.body.total).toBe(1);
+    expect(res.body.meta.total).toBe(1);
 
     const item = res.body.data[0] as Record<string, unknown>;
     expect(item).toHaveProperty('exercise');
