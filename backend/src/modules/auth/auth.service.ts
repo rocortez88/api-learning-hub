@@ -79,7 +79,7 @@ export async function register(input: RegisterInput) {
     .get();
 
   if (existingEmail) {
-    throw new AppError(409, 'Credenciales invalidas', 'CONFLICT');
+    throw new AppError(409, 'El email ya está registrado', 'CONFLICT');
   }
 
   // 2. Check username uniqueness
@@ -90,7 +90,7 @@ export async function register(input: RegisterInput) {
     .get();
 
   if (existingUsername) {
-    throw new AppError(409, 'Credenciales invalidas', 'CONFLICT');
+    throw new AppError(409, 'El nombre de usuario ya está en uso', 'CONFLICT');
   }
 
   // 3. Hash password and create user
