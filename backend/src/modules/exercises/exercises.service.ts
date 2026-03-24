@@ -35,7 +35,7 @@ function extractPublicValidation(
 
   if (exerciseType === 'quiz' && Array.isArray(parsed.options)) {
     return {
-      type,
+      type: 'exact_match' as const,
       options: (parsed.options as { key: string; text: string }[]).map((opt) => ({
         key: opt.key,
         text: opt.text,

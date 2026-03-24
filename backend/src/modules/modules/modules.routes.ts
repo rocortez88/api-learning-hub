@@ -147,7 +147,7 @@ modulesRouter.get(
   requireAuth,
   (req: Request, res: Response, next: NextFunction) => {
     try {
-      const data = modulesService.getModuleBySlug(req.params.slug);
+      const data = modulesService.getModuleBySlug(req.params['slug'] ?? '');
       res.status(200).json({ data });
     } catch (err) {
       next(err);

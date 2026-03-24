@@ -11,6 +11,9 @@ import Database from 'better-sqlite3';
 import { randomUUID } from 'crypto';
 import { level1 } from './seeds/level1.js';
 import { level2 } from './seeds/level2.js';
+import { level3 } from './seeds/level3.js';
+import { level4 } from './seeds/level4.js';
+import { level5Modules } from './seeds/level5.js';
 import type { SeedModule } from './seeds/types.js';
 
 const DB_PATH = process.env['DATABASE_URL']?.replace('file:', '') ?? './dev.db';
@@ -23,7 +26,7 @@ function run() {
   // Crear tablas si no existen (sin depender de migraciones previas)
   initSchema(sqlite);
 
-  const modules: SeedModule[] = [level1, level2];
+  const modules: SeedModule[] = [level1, level2, level3, level4, ...level5Modules];
 
   let totalModules = 0;
   let totalLessons = 0;

@@ -22,8 +22,8 @@ function parseDurationMs(duration: string): number {
   const match = /^(\d+)([smhd])$/.exec(duration);
   if (!match) return 7 * 24 * 60 * 60 * 1000; // fallback: 7 days
 
-  const value = parseInt(match[1], 10);
-  const unit  = match[2];
+  const value = parseInt(match[1] ?? '0', 10);
+  const unit  = match[2] ?? '';
 
   switch (unit) {
     case 's': return value * 1000;

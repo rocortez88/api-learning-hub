@@ -98,7 +98,7 @@ exercisesRouter.get(
   requireAuth,
   (req: Request, res: Response, next: NextFunction) => {
     try {
-      const data = exercisesService.getExerciseById(req.params.id);
+      const data = exercisesService.getExerciseById(req.params['id'] ?? '');
       res.status(200).json({ data });
     } catch (err) {
       next(err);
