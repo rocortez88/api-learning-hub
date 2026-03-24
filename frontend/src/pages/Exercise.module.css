@@ -1,0 +1,275 @@
+/* ── Layout ── */
+.page {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 24px 20px 48px;
+}
+
+.center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  min-height: 300px;
+  text-align: center;
+}
+
+/* ── Navigation ── */
+.nav {
+  margin-bottom: 20px;
+}
+
+/* ── Header ── */
+.header {
+  margin-bottom: 24px;
+}
+
+.metaRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+  flex-wrap: wrap;
+}
+
+.points {
+  font-size: 13px;
+  color: #9d9daa;
+}
+
+.prompt {
+  font-size: 17px;
+  line-height: 1.65;
+  color: #e0e0e0;
+  margin: 0;
+  white-space: pre-wrap;
+}
+
+/* ── Exercise body ── */
+.exerciseBody {
+  margin-bottom: 24px;
+}
+
+/* ── Quiz / Theory ── */
+.quizOptions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.quizOption {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 14px 16px;
+  border-radius: 8px;
+  border: 2px solid #2d2d2d;
+  background: #1a1a2e;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+  text-align: left;
+  width: 100%;
+  color: #e0e0e0;
+  font-size: 15px;
+}
+
+.quizOption:hover:not(:disabled) {
+  border-color: #4a90d9;
+  background: #1e2a3e;
+}
+
+.quizOptionSelected {
+  border-color: #4a90d9;
+  background: #1e2a3e;
+}
+
+.quizOption:disabled {
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.optionLetter {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  min-width: 26px;
+  border-radius: 50%;
+  background: #2d2d4a;
+  font-size: 12px;
+  font-weight: 700;
+  color: #9d9daa;
+}
+
+.quizOptionSelected .optionLetter {
+  background: #4a90d9;
+  color: #fff;
+}
+
+/* ── Observe ── */
+.observeSection {
+  margin-bottom: 20px;
+}
+
+.observeQuestion {
+  font-size: 15px;
+  color: #c9d1d9;
+  margin: 16px 0 8px;
+}
+
+.observeTextarea {
+  width: 100%;
+  min-height: 100px;
+  padding: 12px;
+  border-radius: 6px;
+  border: 1px solid #2d2d2d;
+  background: #111122;
+  color: #e0e0e0;
+  font-size: 14px;
+  font-family: inherit;
+  resize: vertical;
+  box-sizing: border-box;
+}
+
+.observeTextarea:focus {
+  outline: none;
+  border-color: #4a90d9;
+}
+
+/* ── Fill-in ── */
+.fillCode {
+  font-family: 'Menlo', 'Consolas', monospace;
+  font-size: 14px;
+  line-height: 2;
+  background: #111122;
+  border-radius: 8px;
+  padding: 16px;
+  color: #c9d1d9;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.blank {
+  display: inline-block;
+  min-width: 100px;
+  padding: 2px 6px;
+  margin: 0 4px;
+  border: none;
+  border-bottom: 2px solid #4a90d9;
+  background: transparent;
+  color: #79b8ff;
+  font-family: 'Menlo', 'Consolas', monospace;
+  font-size: 14px;
+  text-align: center;
+  outline: none;
+  vertical-align: middle;
+}
+
+.blank:focus {
+  border-bottom-color: #79b8ff;
+  background: rgba(74, 144, 217, 0.08);
+  border-radius: 2px;
+}
+
+.blank::placeholder {
+  color: #4a90d9;
+  opacity: 0.7;
+}
+
+/* ── Build / Debug ── */
+.editorWrapper {
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid #2d2d2d;
+}
+
+/* ── Hints ── */
+.hintsSection {
+  margin-bottom: 20px;
+}
+
+.hint {
+  padding: 12px 16px;
+  border-radius: 6px;
+  background: #1a2a1a;
+  border-left: 3px solid #3a8f3a;
+  color: #c9d1d9;
+  font-size: 14px;
+  margin-top: 10px;
+}
+
+.hintLabel {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: #5faa5f;
+  margin-bottom: 4px;
+}
+
+/* ── Actions bar ── */
+.actionsBar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+/* ── Result banner ── */
+.resultBanner {
+  margin-top: 20px;
+  padding: 16px 20px;
+  border-radius: 8px;
+}
+
+.resultBannerPass {
+  background: #0f3a1f;
+  border: 1px solid #2a7a2a;
+}
+
+.resultBannerFail {
+  background: #3a1a1a;
+  border: 1px solid #7a2a2a;
+}
+
+.resultTitle {
+  font-size: 18px;
+  font-weight: 700;
+  margin: 0 0 6px;
+}
+
+.resultTitlePass { color: #75c798; }
+.resultTitleFail { color: #ff8080; }
+
+.resultMessage {
+  font-size: 14px;
+  color: #c9d1d9;
+  margin: 0 0 14px;
+}
+
+.resultPoints {
+  font-size: 14px;
+  color: #f0a930;
+  font-weight: 600;
+  margin: 0 0 14px;
+}
+
+.resultActions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+/* ── Error / misc ── */
+.errorText {
+  color: #ff8080;
+  font-size: 15px;
+  margin: 0;
+}
+
+.loadingText {
+  color: #9d9daa;
+  margin: 0;
+}

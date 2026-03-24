@@ -77,3 +77,35 @@ export interface PaginatedResponse<T> {
   pageSize: number;
   totalPages: number;
 }
+
+// ─── Stats ────────────────────────────────────────────────────────────────────
+
+export interface UserStats {
+  exercisesCompleted: number;
+  totalPoints: number;
+  streakDays: number;
+  modulesUnlocked: number;
+  practiceQueueSize: number;
+}
+
+// ─── Practice queue ────────────────────────────────────────────────────────────
+
+export interface PracticeQueueItem {
+  exerciseId: string;
+  lessonId: string;
+  nextReviewAt: string;
+  intervalDays: number;
+  repetitions: number;
+}
+
+// ─── Module with lessons ───────────────────────────────────────────────────────
+
+export interface ModuleWithLessons extends Module {
+  lessons: LessonWithStats[];
+}
+
+export interface LessonWithStats extends Lesson {
+  exerciseCount: number;
+  totalPoints: number;
+  completedExercises?: number;
+}

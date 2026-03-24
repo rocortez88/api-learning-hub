@@ -1,0 +1,133 @@
+.container {
+  border: 1px solid #2d2d2d;
+  border-radius: 8px;
+  overflow: hidden;
+  font-family: 'Menlo', 'Consolas', monospace;
+  font-size: 13px;
+  background: #1a1a2e;
+}
+
+.panel {
+  padding: 16px;
+}
+
+.panelLabel {
+  margin: 0 0 10px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #7c7c8a;
+}
+
+.divider {
+  height: 1px;
+  background: #2d2d2d;
+}
+
+/* ── Method badges ── */
+.method {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  margin-right: 10px;
+}
+
+.methodGet    { background: #0f5132; color: #75c798; }
+.methodPost   { background: #1c3c5e; color: #79b8ff; }
+.methodPut    { background: #3a2a00; color: #f0a930; }
+.methodDelete { background: #5e1c1c; color: #ff8080; }
+.methodPatch  { background: #3a1c5e; color: #d2a8ff; }
+
+.requestLine {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.url {
+  color: #e0e0e0;
+  word-break: break-all;
+}
+
+/* ── Status codes ── */
+.statusLine {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.statusCode {
+  display: inline-block;
+  padding: 2px 10px;
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.statusOk          { background: #0f5132; color: #75c798; }
+.statusRedirect    { background: #1c3c5e; color: #79b8ff; }
+.statusClientError { background: #3a2a00; color: #f0a930; }
+.statusServerError { background: #5e1c1c; color: #ff8080; }
+
+.statusText {
+  color: #9d9daa;
+  font-size: 13px;
+}
+
+/* ── Body block ── */
+.bodySection {
+  margin-top: 12px;
+}
+
+.bodyLabel {
+  margin: 0 0 6px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #7c7c8a;
+}
+
+.codeBlock {
+  margin: 0;
+  padding: 12px;
+  background: #111122;
+  border-radius: 6px;
+  color: #c9d1d9;
+  white-space: pre-wrap;
+  word-break: break-word;
+  max-height: 240px;
+  overflow-y: auto;
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.emptyResponse {
+  color: #7c7c8a;
+  margin: 0;
+  font-style: italic;
+}
+
+/* ── Skeleton ── */
+.skeleton {
+  pointer-events: none;
+}
+
+.skeletonLine {
+  height: 14px;
+  border-radius: 4px;
+  background: linear-gradient(90deg, #2a2a3e 25%, #353550 50%, #2a2a3e 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.4s infinite;
+  margin-bottom: 10px;
+}
+
+@keyframes shimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}

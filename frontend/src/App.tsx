@@ -1,20 +1,15 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
-import { useAuthStore } from './store/authStore.ts';
+import { AppLayout, ProtectedRoute } from './components/layout';
 
-// Pages (se implementan en Fase 4)
-import Home from './pages/Home.tsx';
-import Login from './pages/Login.tsx';
-import Register from './pages/Register.tsx';
-import Dashboard from './pages/Dashboard.tsx';
-import ModulePage from './pages/Module.tsx';
-import ExercisePage from './pages/Exercise.tsx';
-import DrillPage from './pages/Drill.tsx';
-import Profile from './pages/Profile.tsx';
-
-function PrivateRoute({ children }: { children: React.ReactNode }) {
-  const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
-  return isAuthenticated ? <>{children}</> : <Navigate to="/login" replace />;
-}
+// Pages
+import Home from './pages/Home';
+import Login from './pages/Login';
+import Register from './pages/Register';
+import Dashboard from './pages/Dashboard';
+import ModulePage from './pages/Module';
+import ExercisePage from './pages/Exercise';
+import DrillPage from './pages/Drill';
+import Profile from './pages/Profile';
 
 export default function App() {
   return (
@@ -24,12 +19,67 @@ export default function App() {
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
 
-      {/* Rutas protegidas */}
-      <Route path="/dashboard" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
-      <Route path="/modules/:moduleSlug" element={<PrivateRoute><ModulePage /></PrivateRoute>} />
-      <Route path="/exercises/:exerciseId" element={<PrivateRoute><ExercisePage /></PrivateRoute>} />
-      <Route path="/drill/:lessonId" element={<PrivateRoute><DrillPage /></PrivateRoute>} />
-      <Route path="/profile" element={<PrivateRoute><Profile /></PrivateRoute>} />
+      {/* Rutas protegidas — envueltas en AppLayout */}
+      <Route
+        path="/dashboard"
+        element={
+          <ProtectedRoute>
+            <AppLayout>
+              <Dashboard />
+            </AppLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/modules/:moduleSlug"
+        element={
+          <ProtectedRoute>
+            <AppLayout>
+              <ModulePage />
+            </AppLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/modules/:moduleSlug/lessons/:lessonId"
+        element={
+          <ProtectedRoute>
+            <AppLayout>
+              <ExercisePage />
+            </AppLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/exercises/:exerciseId"
+        element={
+          <ProtectedRoute>
+            <AppLayout>
+              <ExercisePage />
+            </AppLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/drill/:lessonId"
+        element={
+          <ProtectedRoute>
+            <AppLayout>
+              <DrillPage />
+            </AppLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/profile"
+        element={
+          <ProtectedRoute>
+            <AppLayout>
+              <Profile />
+            </AppLayout>
+          </ProtectedRoute>
+        }
+      />
 
       {/* Fallback */}
       <Route path="*" element={<Navigate to="/" replace />} />

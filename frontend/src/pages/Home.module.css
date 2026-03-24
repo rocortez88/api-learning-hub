@@ -1,0 +1,183 @@
+/* ── Page wrapper ── */
+.page {
+  background-color: var(--color-bg);
+}
+
+/* ── Hero ── */
+.hero {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding-top: 5rem;
+  padding-bottom: 5rem;
+  gap: 1.25rem;
+}
+
+.heroBadge {
+  margin-bottom: 0.25rem;
+}
+
+.heroTitle {
+  font-size: clamp(2rem, 5vw, 3.25rem);
+  font-weight: 800;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  color: var(--color-text);
+  max-width: 720px;
+}
+
+.heroAccent {
+  color: var(--color-primary);
+}
+
+.heroSubtitle {
+  font-size: 1.1rem;
+  color: var(--color-text-muted);
+  max-width: 560px;
+  line-height: 1.7;
+}
+
+.heroSubtitle code {
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  padding: 0.1em 0.4em;
+  border-radius: 4px;
+  font-size: 0.95em;
+  color: var(--color-text);
+}
+
+.heroCtas {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-top: 0.5rem;
+}
+
+/* ── Section commons ── */
+.sectionTitle {
+  font-size: 1.625rem;
+  font-weight: 700;
+  color: var(--color-text);
+  text-align: center;
+  margin-bottom: 0.5rem;
+}
+
+.sectionSubtitle {
+  font-size: 0.9375rem;
+  color: var(--color-text-muted);
+  text-align: center;
+  margin-bottom: 2.5rem;
+}
+
+/* ── Features ── */
+.features {
+  padding-top: 4rem;
+  padding-bottom: 4rem;
+}
+
+.featuresGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+.featureCard {
+  /* The Card wraps children in a .body div — style the inner content directly */
+}
+
+.featureIcon {
+  font-size: 1.75rem;
+  line-height: 1;
+  margin-bottom: 0.25rem;
+}
+
+.featureTitle {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.featureDesc {
+  font-size: 0.875rem;
+  color: var(--color-text-muted);
+  line-height: 1.6;
+}
+
+/* ── Curriculum ── */
+.curriculum {
+  padding-top: 4rem;
+  padding-bottom: 4rem;
+  border-top: 1px solid var(--color-border);
+}
+
+.moduleList {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.875rem;
+}
+
+.moduleCard {
+  transition: border-color 0.15s ease;
+}
+
+.moduleCard:hover {
+  border-color: var(--color-primary);
+}
+
+.moduleHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.625rem;
+}
+
+.moduleExercises {
+  font-size: 0.8125rem;
+  color: var(--color-text-muted);
+}
+
+.moduleTitle {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--color-text);
+  margin-bottom: 0.3rem;
+}
+
+.moduleDesc {
+  font-size: 0.875rem;
+  color: var(--color-text-muted);
+  line-height: 1.6;
+}
+
+/* ── CTA final ── */
+.ctaSection {
+  padding-top: 4rem;
+  padding-bottom: 5rem;
+  border-top: 1px solid var(--color-border);
+  display: flex;
+  justify-content: center;
+}
+
+.ctaBox {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 1rem;
+  max-width: 480px;
+}
+
+.ctaTitle {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+.ctaDesc {
+  font-size: 1rem;
+  color: var(--color-text-muted);
+}

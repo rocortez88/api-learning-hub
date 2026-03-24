@@ -1,0 +1,386 @@
+/* ── Layout ── */
+.page {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 24px 20px 48px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* ── Loading / Error / Empty centered ── */
+.center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  min-height: 300px;
+  text-align: center;
+}
+
+.loadingText {
+  font-size: 0.9375rem;
+  color: var(--color-text-muted, #9d9daa);
+  margin: 0;
+}
+
+.errorText {
+  color: #ff8080;
+  font-size: 0.9375rem;
+  background-color: rgba(239, 68, 68, 0.08);
+  border: 1px solid rgba(239, 68, 68, 0.25);
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  text-align: center;
+  max-width: 480px;
+  margin: 0;
+}
+
+/* ── Empty state ── */
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  padding: 48px 24px;
+  text-align: center;
+}
+
+.emptyIcon {
+  font-size: 3rem;
+  line-height: 1;
+}
+
+.emptyTitle {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--color-text, #e0e0e0);
+  margin: 0;
+}
+
+.emptyDesc {
+  font-size: 0.9375rem;
+  color: var(--color-text-muted, #9d9daa);
+  max-width: 420px;
+  line-height: 1.6;
+  margin: 0;
+}
+
+/* ── Drill session header ── */
+.drillHeader {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  background: #1a1a2e;
+  border: 1px solid #2d2d2d;
+  border-radius: 10px;
+  padding: 16px 20px;
+}
+
+.drillMeta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.drillCounter {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--color-text-muted, #9d9daa);
+}
+
+.drillTimer {
+  font-size: 0.875rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-primary, #4a90d9);
+  letter-spacing: 0.04em;
+}
+
+/* ── Exercise card ── */
+.exerciseCard {
+  background: #16162a;
+  border: 1px solid #2d2d2d;
+  border-radius: 10px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.metaRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.points {
+  font-size: 13px;
+  color: #9d9daa;
+  margin-left: auto;
+}
+
+.prompt {
+  font-size: 16px;
+  line-height: 1.65;
+  color: #e0e0e0;
+  margin: 0;
+  white-space: pre-wrap;
+}
+
+/* ── Quiz ── */
+.quizOptions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.quizOption {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: 8px;
+  border: 2px solid #2d2d2d;
+  background: #1a1a2e;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+  text-align: left;
+  width: 100%;
+  color: #e0e0e0;
+  font-size: 14px;
+}
+
+.quizOption:hover:not(:disabled) {
+  border-color: #4a90d9;
+  background: #1e2a3e;
+}
+
+.quizOptionSelected {
+  border-color: #4a90d9;
+  background: #1e2a3e;
+}
+
+.quizOption:disabled {
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.optionLetter {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  min-width: 24px;
+  border-radius: 50%;
+  background: #2d2d4a;
+  font-size: 11px;
+  font-weight: 700;
+  color: #9d9daa;
+  flex-shrink: 0;
+}
+
+.quizOptionSelected .optionLetter {
+  background: #4a90d9;
+  color: #fff;
+}
+
+/* ── Fill-in ── */
+.fillCode {
+  font-family: 'Menlo', 'Consolas', monospace;
+  font-size: 13px;
+  line-height: 2;
+  background: #111122;
+  border-radius: 8px;
+  padding: 14px;
+  color: #c9d1d9;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.blank {
+  display: inline-block;
+  min-width: 90px;
+  padding: 2px 6px;
+  margin: 0 4px;
+  border: none;
+  border-bottom: 2px solid #4a90d9;
+  background: transparent;
+  color: #79b8ff;
+  font-family: 'Menlo', 'Consolas', monospace;
+  font-size: 13px;
+  text-align: center;
+  outline: none;
+  vertical-align: middle;
+}
+
+.blank:focus {
+  border-bottom-color: #79b8ff;
+  background: rgba(74, 144, 217, 0.08);
+  border-radius: 2px;
+}
+
+.blank::placeholder {
+  color: #4a90d9;
+  opacity: 0.7;
+}
+
+/* ── Textarea (observe / build / debug) ── */
+.textareaWrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.starterCode {
+  font-family: 'Menlo', 'Consolas', monospace;
+  font-size: 13px;
+  line-height: 1.6;
+  background: #111122;
+  border-radius: 6px;
+  padding: 12px;
+  color: #c9d1d9;
+  overflow-x: auto;
+  white-space: pre;
+  margin: 0;
+}
+
+.codeTextarea {
+  width: 100%;
+  padding: 12px;
+  border-radius: 6px;
+  border: 1px solid #2d2d2d;
+  background: #111122;
+  color: #e0e0e0;
+  font-size: 13px;
+  font-family: 'Menlo', 'Consolas', monospace;
+  resize: vertical;
+  box-sizing: border-box;
+  line-height: 1.6;
+}
+
+.codeTextarea:focus {
+  outline: none;
+  border-color: #4a90d9;
+}
+
+.codeTextarea:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+/* ── Actions bar ── */
+.actionsBar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+/* ── Feedback banner ── */
+.feedbackBanner {
+  padding: 16px 20px;
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.feedbackPass {
+  background: #0f3a1f;
+  border: 1px solid #2a7a2a;
+}
+
+.feedbackFail {
+  background: #3a1a1a;
+  border: 1px solid #7a2a2a;
+}
+
+.feedbackTitle {
+  font-size: 1.125rem;
+  font-weight: 700;
+  margin: 0;
+}
+
+.feedbackTitlePass { color: #75c798; }
+.feedbackTitleFail { color: #ff8080; }
+
+.feedbackPoints {
+  font-size: 14px;
+  color: #f0a930;
+  font-weight: 600;
+  margin: 0;
+}
+
+.feedbackMessage {
+  font-size: 14px;
+  color: #c9d1d9;
+  margin: 0;
+}
+
+.feedbackAutoAdvance {
+  font-size: 12px;
+  color: #5faa5f;
+  margin: 0;
+  font-style: italic;
+}
+
+/* ── Summary screen ── */
+.summary {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 32px;
+  padding: 48px 24px;
+  text-align: center;
+}
+
+.summaryTitle {
+  font-size: 1.75rem;
+  font-weight: 800;
+  color: var(--color-text, #e0e0e0);
+  margin: 0;
+}
+
+.summaryStats {
+  display: flex;
+  gap: 32px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.summaryStat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  min-width: 100px;
+}
+
+.summaryStatValue {
+  font-size: 2rem;
+  font-weight: 800;
+  color: var(--color-text, #e0e0e0);
+  line-height: 1;
+}
+
+.summaryPoints {
+  color: #f0a930;
+}
+
+.summaryStatLabel {
+  font-size: 0.8125rem;
+  color: var(--color-text-muted, #9d9daa);
+  font-weight: 500;
+}
+
+.summaryActions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
