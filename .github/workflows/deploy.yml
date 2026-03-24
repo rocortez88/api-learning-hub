@@ -1,0 +1,39 @@
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy:
+    name: Deploy a produccion
+    runs-on: ubuntu-latest
+    needs: []  # Aqui se puede referenciar el job de CI cuando esten en el mismo archivo
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Build Backend
+        working-directory: backend
+        run: |
+          npm ci
+          npm run build
+
+      - name: Build Frontend
+        working-directory: frontend
+        run: |
+          npm ci
+          npm run build
+        env:
+          VITE_API_URL: ${{ secrets.VITE_API_URL }}
+          VITE_APP_TITLE: 'API Learning Hub'
+
+      # ─── Aqui se configura el deploy segun el proveedor elegido ──────────
+      # Opciones: Railway, Render, Fly.io, VPS con SSH
+      # Por ahora se deja como placeholder para configurar en Fase 7
+      - name: Deploy (placeholder)
+        run: echo "Configurar deploy en Fase 7 segun proveedor elegido"

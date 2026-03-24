@@ -1,0 +1,71 @@
+version: '3.9'
+
+services:
+  # ─── Backend ──────────────────────────────────────────────────────────────
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.dev
+    container_name: api_hub_backend
+    ports:
+      - '3001:3001'
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+    environment:
+      NODE_ENV: development
+      PORT: 3001
+      DATABASE_URL: file:./dev.db
+      JWT_SECRET: ${JWT_SECRET:-dev_secret_cambia_en_produccion}
+      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-15m}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:-dev_refresh_secret_cambia_en_produccion}
+      JWT_REFRESH_EXPIRES_IN: ${JWT_REFRESH_EXPIRES_IN:-7d}
+      CORS_ORIGIN: http://localhost:5173
+    depends_on:
+      - db
+    restart: unless-stopped
+    healthcheck:
+      test: ['CMD', 'curl', '-f', 'http://localhost:3001/health']
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # ─── Frontend ─────────────────────────────────────────────────────────────
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.dev
+    container_name: api_hub_frontend
+    ports:
+      - '5173:5173'
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    environment:
+      VITE_API_URL: http://localhost:3001/api
+      VITE_APP_TITLE: API Learning Hub
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+  # ─── Base de datos (PostgreSQL para produccion local) ─────────────────────
+  db:
+    image: postgres:16-alpine
+    container_name: api_hub_db
+    ports:
+      - '5432:5432'
+    environment:
+      POSTGRES_USER: api_user
+      POSTGRES_PASSWORD: api_password
+      POSTGRES_DB: api_learning_hub
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U api_user -d api_learning_hub']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres_data:
