@@ -44,7 +44,7 @@
 - [x] 5a. `npm run check` pasa en raíz (lint + typecheck + tests) — 0 errores, solo warnings esperados
 - [x] 5b. E2E Playwright: 8/8 pasan
 - [x] 5c. Build de producción sin errores (`npm run build`)
-- [ ] 5d. App funcional end-to-end: registro → login → módulos → ejercicio
+- [x] 5d. App funcional end-to-end: registro → login → módulos → ejercicio
 
 ---
 
