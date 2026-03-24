@@ -239,6 +239,10 @@ export default function DrillPage() {
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const autoAdvanceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  useEffect(() => {
+    document.title = 'Drill | API Learning Hub';
+  }, []);
+
   // ── Start / stop timer ──
   function startTimer() {
     if (timerRef.current) clearInterval(timerRef.current);

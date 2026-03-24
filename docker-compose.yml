@@ -5,27 +5,28 @@ services:
   backend:
     build:
       context: ./backend
-      dockerfile: Dockerfile.dev
+      dockerfile: Dockerfile
     container_name: api_hub_backend
     ports:
       - '3001:3001'
-    volumes:
-      - ./backend:/app
-      - /app/node_modules
     environment:
-      NODE_ENV: development
-      PORT: 3001
-      DATABASE_URL: file:./dev.db
-      JWT_SECRET: ${JWT_SECRET:-dev_secret_cambia_en_produccion}
+      NODE_ENV: ${NODE_ENV:-production}
+      PORT: ${PORT:-3001}
+      DATABASE_URL: ${DATABASE_URL:-file:./dev.db}
+      JWT_SECRET: ${JWT_SECRET}
       JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-15m}
-      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:-dev_refresh_secret_cambia_en_produccion}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET}
       JWT_REFRESH_EXPIRES_IN: ${JWT_REFRESH_EXPIRES_IN:-7d}
-      CORS_ORIGIN: http://localhost:5173
+      CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost:5173}
+      RATE_LIMIT_WINDOW_MS: ${RATE_LIMIT_WINDOW_MS:-60000}
+      RATE_LIMIT_MAX_REQUESTS: ${RATE_LIMIT_MAX_REQUESTS:-100}
+      RATE_LIMIT_AUTH_MAX: ${RATE_LIMIT_AUTH_MAX:-5}
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     restart: unless-stopped
     healthcheck:
-      test: ['CMD', 'curl', '-f', 'http://localhost:3001/health']
+      test: ['CMD', 'wget', '--no-verbose', '--tries=1', '--spider', 'http://localhost:3001/health']
       interval: 30s
       timeout: 10s
       retries: 3
@@ -34,35 +35,32 @@ services:
   frontend:
     build:
       context: ./frontend
-      dockerfile: Dockerfile.dev
+      dockerfile: Dockerfile
     container_name: api_hub_frontend
     ports:
-      - '5173:5173'
-    volumes:
-      - ./frontend:/app
-      - /app/node_modules
+      - '80:80'
     environment:
-      VITE_API_URL: http://localhost:3001/api
-      VITE_APP_TITLE: API Learning Hub
+      VITE_API_URL: ${VITE_API_URL:-http://localhost:3001/api}
+      VITE_APP_TITLE: ${VITE_APP_TITLE:-API Learning Hub}
     depends_on:
       - backend
     restart: unless-stopped
 
-  # ─── Base de datos (PostgreSQL para produccion local) ─────────────────────
+  # ─── Base de datos (PostgreSQL) ───────────────────────────────────────────
   db:
     image: postgres:16-alpine
     container_name: api_hub_db
     ports:
       - '5432:5432'
     environment:
-      POSTGRES_USER: api_user
-      POSTGRES_PASSWORD: api_password
-      POSTGRES_DB: api_learning_hub
+      POSTGRES_USER: ${POSTGRES_USER:-api_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-api_password}
+      POSTGRES_DB: ${POSTGRES_DB:-api_learning_hub}
     volumes:
       - postgres_data:/var/lib/postgresql/data
     restart: unless-stopped
     healthcheck:
-      test: ['CMD-SHELL', 'pg_isready -U api_user -d api_learning_hub']
+      test: ['CMD-SHELL', 'pg_isready -U ${POSTGRES_USER:-api_user} -d ${POSTGRES_DB:-api_learning_hub}']
       interval: 10s
       timeout: 5s
       retries: 5

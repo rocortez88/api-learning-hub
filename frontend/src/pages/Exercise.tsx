@@ -296,6 +296,10 @@ export default function ExercisePage() {
   // Timer — track time spent on exercise
   const startTimeRef = useRef<number>(Date.now());
 
+  useEffect(() => {
+    document.title = 'Ejercicio | API Learning Hub';
+  }, []);
+
   // ── Load exercise ──
   useEffect(() => {
     if (!exerciseId || !/^\d+$/.test(exerciseId)) {

@@ -89,8 +89,10 @@ export default function ModulePage() {
 
         if (cancelled) return;
 
+        const loadedModule = res.data.data;
+        document.title = `Módulo: ${loadedModule.title} | API Learning Hub`;
         setState({
-          module: res.data.data,
+          module: loadedModule,
           loading: false,
           error: null,
           notFound: false,

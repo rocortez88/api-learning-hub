@@ -1,15 +1,36 @@
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { lazy, Suspense } from 'react';
+import { Routes, Route } from 'react-router-dom';
 import { AppLayout, ProtectedRoute } from './components/layout';
 
-// Pages
+// Pages — static imports (lightweight, always needed)
 import Home from './pages/Home';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
-import ModulePage from './pages/Module';
-import ExercisePage from './pages/Exercise';
-import DrillPage from './pages/Drill';
-import Profile from './pages/Profile';
+import NotFound from './pages/NotFound';
+
+// Pages — lazy loaded (heavier pages)
+const ModulePage = lazy(() => import('./pages/Module'));
+const ExercisePage = lazy(() => import('./pages/Exercise'));
+const DrillPage = lazy(() => import('./pages/Drill'));
+const Profile = lazy(() => import('./pages/Profile'));
+
+function PageLoader() {
+  return (
+    <div
+      style={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        minHeight: '60vh',
+        color: 'var(--color-text-muted)',
+        fontSize: '0.9375rem',
+      }}
+    >
+      Cargando...
+    </div>
+  );
+}
 
 export default function App() {
   return (
@@ -35,7 +56,9 @@ export default function App() {
         element={
           <ProtectedRoute>
             <AppLayout>
-              <ModulePage />
+              <Suspense fallback={<PageLoader />}>
+                <ModulePage />
+              </Suspense>
             </AppLayout>
           </ProtectedRoute>
         }
@@ -45,7 +68,9 @@ export default function App() {
         element={
           <ProtectedRoute>
             <AppLayout>
-              <ExercisePage />
+              <Suspense fallback={<PageLoader />}>
+                <ExercisePage />
+              </Suspense>
             </AppLayout>
           </ProtectedRoute>
         }
@@ -55,7 +80,9 @@ export default function App() {
         element={
           <ProtectedRoute>
             <AppLayout>
-              <ExercisePage />
+              <Suspense fallback={<PageLoader />}>
+                <ExercisePage />
+              </Suspense>
             </AppLayout>
           </ProtectedRoute>
         }
@@ -65,7 +92,9 @@ export default function App() {
         element={
           <ProtectedRoute>
             <AppLayout>
-              <DrillPage />
+              <Suspense fallback={<PageLoader />}>
+                <DrillPage />
+              </Suspense>
             </AppLayout>
           </ProtectedRoute>
         }
@@ -75,14 +104,16 @@ export default function App() {
         element={
           <ProtectedRoute>
             <AppLayout>
-              <Profile />
+              <Suspense fallback={<PageLoader />}>
+                <Profile />
+              </Suspense>
             </AppLayout>
           </ProtectedRoute>
         }
       />
 
-      {/* Fallback */}
-      <Route path="*" element={<Navigate to="/" replace />} />
+      {/* Fallback — 404 */}
+      <Route path="*" element={<NotFound />} />
     </Routes>
   );
 }

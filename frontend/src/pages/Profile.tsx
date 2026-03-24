@@ -101,6 +101,10 @@ export default function Profile() {
   });
 
   useEffect(() => {
+    document.title = 'Mi Perfil | API Learning Hub';
+  }, []);
+
+  useEffect(() => {
     if (!user) {
       navigate('/login', { replace: true });
       return;

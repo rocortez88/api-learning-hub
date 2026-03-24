@@ -1,0 +1,43 @@
+version: '3.9'
+
+# Development overrides — use with:
+#   docker-compose -f docker-compose.yml -f docker-compose.dev.yml up
+#
+# This file overrides the production docker-compose.yml for local development:
+#   - Uses Dockerfile.dev (tsx watch, Vite HMR)
+#   - Mounts source code as volumes for live reload
+#   - Uses SQLite instead of PostgreSQL
+
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.dev
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+    environment:
+      NODE_ENV: development
+      DATABASE_URL: file:./dev.db
+      JWT_SECRET: ${JWT_SECRET:-dev_secret_cambia_en_produccion}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:-dev_refresh_secret_cambia_en_produccion}
+      CORS_ORIGIN: http://localhost:5173
+    depends_on: {}
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.dev
+    ports:
+      - '5173:5173'
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    environment:
+      VITE_API_URL: http://localhost:3001/api
+      VITE_APP_TITLE: API Learning Hub
+
+  # Remove PostgreSQL dependency in dev (backend uses SQLite)
+  db:
+    profiles:
+      - postgres-dev

@@ -57,6 +57,10 @@ export default function Dashboard() {
   });
 
   useEffect(() => {
+    document.title = 'Dashboard | API Learning Hub';
+  }, []);
+
+  useEffect(() => {
     let cancelled = false;
 
     async function fetchData() {
