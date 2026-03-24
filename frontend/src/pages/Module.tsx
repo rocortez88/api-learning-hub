@@ -1,19 +1,10 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import axios from 'axios';
-import { apiClient } from '../api/client';
-import type { ModuleWithLessons, LessonWithStats, ApiResponse } from '../types';
+import { useModuleBySlug } from '../hooks/useModuleBySlug';
+import type { LessonWithStats } from '../types';
 import { Spinner, Badge, Button } from '../components/ui';
 import { ProgressBar } from '../components/progress';
 import styles from './Module.module.css';
-
-// ─── Local state shape ─────────────────────────────────────────────────────────
-interface ModulePageState {
-  module: ModuleWithLessons | null;
-  loading: boolean;
-  error: string | null;
-  notFound: boolean;
-}
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -68,82 +59,16 @@ const STATUS_ICON: Record<string, string> = {
 export default function ModulePage() {
   const { moduleSlug } = useParams<{ moduleSlug: string }>();
   const navigate = useNavigate();
-
-  const [state, setState] = useState<ModulePageState>({
-    module: null,
-    loading: true,
-    error: null,
-    notFound: false,
-  });
+  const { module: mod, loading, error, notFound } = useModuleBySlug(moduleSlug);
 
   useEffect(() => {
-    if (!moduleSlug) return;
-
-    let cancelled = false;
-
-    async function fetchModule() {
-      try {
-        const res = await apiClient.get<ApiResponse<ModuleWithLessons>>(
-          `/modules/${moduleSlug}`,
-        );
-
-        if (cancelled) return;
-
-        const loadedModule = res.data.data;
-        document.title = `Módulo: ${loadedModule.title} | API Learning Hub`;
-        setState({
-          module: loadedModule,
-          loading: false,
-          error: null,
-          notFound: false,
-        });
-      } catch (err: unknown) {
-        if (cancelled) return;
-
-        if (axios.isAxiosError(err)) {
-          const status = err.response?.status;
-          if (status === 404) {
-            setState({ module: null, loading: false, error: null, notFound: true });
-            return;
-          }
-          if (status !== undefined && status >= 500) {
-            setState({
-              module: null,
-              loading: false,
-              error: 'Error del servidor. Por favor intenta más tarde.',
-              notFound: false,
-            });
-            return;
-          }
-          if (err.response?.data?.error?.message) {
-            const raw = String(err.response.data.error.message).slice(0, 200);
-            setState({
-              module: null,
-              loading: false,
-              error: raw.replace(/[<>"'`]/g, '').trim() || 'Error al procesar la solicitud.',
-              notFound: false,
-            });
-            return;
-          }
-        }
-
-        setState({
-          module: null,
-          loading: false,
-          error: 'Error al cargar los datos. Por favor intenta más tarde.',
-          notFound: false,
-        });
-      }
+    if (mod) {
+      document.title = `Módulo: ${mod.title} | API Learning Hub`;
     }
-
-    void fetchModule();
-    return () => {
-      cancelled = true;
-    };
-  }, [moduleSlug]);
+  }, [mod]);
 
   // ── Render: loading ──
-  if (state.loading) {
+  if (loading) {
     return (
       <main className={styles.page}>
         <div className={styles.center}>
@@ -155,7 +80,7 @@ export default function ModulePage() {
   }
 
   // ── Render: not found ──
-  if (state.notFound) {
+  if (notFound) {
     return (
       <main className={styles.page}>
         <div className={styles.center}>
@@ -169,11 +94,11 @@ export default function ModulePage() {
   }
 
   // ── Render: error ──
-  if (state.error) {
+  if (error) {
     return (
       <main className={styles.page}>
         <div className={styles.center}>
-          <p className={styles.errorText}>{state.error}</p>
+          <p className={styles.errorText}>{error}</p>
           <Button onClick={() => window.location.reload()} variant="secondary" size="sm">
             Reintentar
           </Button>
@@ -182,7 +107,6 @@ export default function ModulePage() {
     );
   }
 
-  const mod = state.module;
   if (!mod) return null;
 
   const progress = mod.progress ?? 0;

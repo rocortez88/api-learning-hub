@@ -67,7 +67,8 @@ test('Clicking "Registrarse" link navigates to /register', async ({ page }) => {
   await page.goto('/login');
 
   // Buscamos el link de registro — el texto es "Regístrate gratis" en Login.tsx
-  const registerLink = page.getByRole('link', { name: /regis/i });
+  // Usamos href en lugar de texto para evitar problemas con caracteres acentuados
+  const registerLink = page.locator('a[href="/register"]');
   await expect(registerLink).toBeVisible();
 
   await registerLink.click();

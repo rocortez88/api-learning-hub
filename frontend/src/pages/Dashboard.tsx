@@ -1,21 +1,11 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
-import { apiClient } from '../api/client';
 import { useAuthStore } from '../store/authStore.ts';
-import type { Module, UserStats, PracticeQueueItem, ApiResponse } from '../types';
+import { useModules } from '../hooks/useModules';
+import type { Module, UserStats, PracticeQueueItem } from '../types';
 import { Spinner, Button, Card } from '../components/ui';
 import { StatsGrid, ModuleCard } from '../components/progress';
 import styles from './Dashboard.module.css';
-
-// ─── Local state shape ─────────────────────────────────────────────────────────
-interface DashboardState {
-  modules: Module[];
-  practiceQueue: PracticeQueueItem[];
-  stats: UserStats;
-  loading: boolean;
-  error: string | null;
-}
 
 function buildStats(modules: Module[], queue: PracticeQueueItem[]): UserStats {
   const unlocked = modules.filter((m) => m.isUnlocked ?? true).length;
@@ -47,70 +37,16 @@ const INITIAL_STATS: UserStats = {
 export default function Dashboard() {
   const user = useAuthStore((s) => s.user);
   const navigate = useNavigate();
-
-  const [state, setState] = useState<DashboardState>({
-    modules: [],
-    practiceQueue: [],
-    stats: INITIAL_STATS,
-    loading: true,
-    error: null,
-  });
+  const { modules, practiceQueue, loading, error, refresh } = useModules();
 
   useEffect(() => {
     document.title = 'Dashboard | API Learning Hub';
   }, []);
 
-  useEffect(() => {
-    let cancelled = false;
-
-    async function fetchData() {
-      try {
-        const [modulesRes, queueRes] = await Promise.all([
-          apiClient.get<ApiResponse<Module[]>>('/modules'),
-          apiClient.get<ApiResponse<PracticeQueueItem[]>>('/practice/queue').catch(() => ({
-            data: { data: [] as PracticeQueueItem[] },
-          })),
-        ]);
-
-        if (cancelled) return;
-
-        const modules = modulesRes.data.data;
-        const queue = queueRes.data.data;
-        const stats = buildStats(modules, queue);
-
-        setState({
-          modules,
-          practiceQueue: queue,
-          stats,
-          loading: false,
-          error: null,
-        });
-      } catch (err: unknown) {
-        if (cancelled) return;
-        let message = 'Error al cargar los datos. Por favor intenta más tarde.';
-        if (axios.isAxiosError(err)) {
-          const status = err.response?.status;
-          if (status !== undefined && status >= 500) {
-            message = 'Error del servidor. Por favor intenta más tarde.';
-          } else if (status === 404) {
-            message = 'No encontrado.';
-          } else if (err.response?.data?.error?.message) {
-            const raw = String(err.response.data.error.message).slice(0, 200);
-            message = raw.replace(/[<>"'`]/g, '').trim() || 'Error al procesar la solicitud.';
-          }
-        }
-        setState((prev) => ({ ...prev, loading: false, error: message }));
-      }
-    }
-
-    void fetchData();
-    return () => {
-      cancelled = true;
-    };
-  }, []);
+  const stats = buildStats(modules, practiceQueue);
 
   // ── Render: loading ──
-  if (state.loading) {
+  if (loading) {
     return (
       <main className={styles.page}>
         <div className={styles.center}>
@@ -122,12 +58,12 @@ export default function Dashboard() {
   }
 
   // ── Render: error ──
-  if (state.error) {
+  if (error) {
     return (
       <main className={styles.page}>
         <div className={styles.center}>
-          <p className={styles.errorText}>{state.error}</p>
-          <Button onClick={() => window.location.reload()} variant="secondary" size="sm">
+          <p className={styles.errorText}>{error}</p>
+          <Button onClick={refresh} variant="secondary" size="sm">
             Reintentar
           </Button>
         </div>
@@ -135,10 +71,10 @@ export default function Dashboard() {
     );
   }
 
-  const hasPracticeQueue = state.practiceQueue.length > 0;
+  const hasPracticeQueue = practiceQueue.length > 0;
   // Group by lessonId to link the drill CTA to the first pending lesson
   const firstQueuedLessonId = hasPracticeQueue
-    ? state.practiceQueue[0]?.lessonId
+    ? practiceQueue[0]?.lessonId
     : null;
 
   return (
@@ -155,8 +91,8 @@ export default function Dashboard() {
           <div className={styles.queueBadge}>
             <span className={styles.queueDot} />
             <span className={styles.queueText}>
-              {state.practiceQueue.length} ejercicio
-              {state.practiceQueue.length !== 1 ? 's' : ''} pendientes de repaso
+              {practiceQueue.length} ejercicio
+              {practiceQueue.length !== 1 ? 's' : ''} pendientes de repaso
             </span>
           </div>
         )}
@@ -165,7 +101,7 @@ export default function Dashboard() {
       {/* ── Stats ── */}
       <section className={styles.section} aria-labelledby="stats-heading">
         <h2 id="stats-heading" className={styles.sectionTitle}>Tu progreso</h2>
-        <StatsGrid stats={state.stats} />
+        <StatsGrid stats={stats} />
       </section>
 
       {/* ── Practice queue CTA ── */}
@@ -178,8 +114,8 @@ export default function Dashboard() {
           >
             <div className={styles.queueCta}>
               <p className={styles.queueCount}>
-                <strong>{state.practiceQueue.length}</strong> ejercicio
-                {state.practiceQueue.length !== 1 ? 's' : ''} en cola
+                <strong>{practiceQueue.length}</strong> ejercicio
+                {practiceQueue.length !== 1 ? 's' : ''} en cola
               </p>
               <Button
                 onClick={() => navigate(`/drill/${firstQueuedLessonId}`)}
@@ -195,11 +131,11 @@ export default function Dashboard() {
       {/* ── Modules grid ── */}
       <section className={styles.section} aria-labelledby="modules-heading">
         <h2 id="modules-heading" className={styles.sectionTitle}>Modulos</h2>
-        {state.modules.length === 0 ? (
+        {modules.length === 0 ? (
           <p className={styles.emptyText}>No hay modulos disponibles aun.</p>
         ) : (
           <div className={styles.modulesGrid}>
-            {state.modules.map((mod) => (
+            {modules.map((mod) => (
               <ModuleCard key={mod.id} module={mod} />
             ))}
           </div>

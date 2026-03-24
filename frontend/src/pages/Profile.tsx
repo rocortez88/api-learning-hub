@@ -1,25 +1,15 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
-import { apiClient } from '../api/client';
 import { useAuthStore } from '../store/authStore.ts';
-import type { Module, UserStats, PracticeQueueItem, ApiResponse, User as FullUser } from '../types';
+import { useModules } from '../hooks/useModules';
+import type { UserStats, User as FullUser } from '../types';
 import { Spinner, Button, Badge } from '../components/ui';
 import { ProgressBar, StatsGrid } from '../components/progress';
 import styles from './Profile.module.css';
 
-// ─── Types ─────────────────────────────────────────────────────────────────
-
-interface PageState {
-  modules: Module[];
-  practiceQueue: PracticeQueueItem[];
-  loading: boolean;
-  error: string | null;
-}
-
 // ─── Helpers ───────────────────────────────────────────────────────────────
 
-function buildStats(modules: Module[], queue: PracticeQueueItem[]): UserStats {
+function buildStats(modules: ReturnType<typeof useModules>['modules'], queue: ReturnType<typeof useModules>['practiceQueue']): UserStats {
   const unlocked = modules.filter((m) => m.isUnlocked ?? true).length;
   const completedModules = modules.filter((m) => (m.progress ?? 0) >= 100).length;
   const exercisesCompleted = completedModules * 20;
@@ -32,21 +22,6 @@ function buildStats(modules: Module[], queue: PracticeQueueItem[]): UserStats {
     modulesUnlocked: unlocked,
     practiceQueueSize: queue.length,
   };
-}
-
-function extractErrorMessage(err: unknown): string {
-  if (axios.isAxiosError(err)) {
-    const status = err.response?.status;
-    if (status !== undefined && status >= 500) {
-      return 'Error del servidor. Por favor intenta más tarde.';
-    }
-    if (status === 404) return 'No encontrado.';
-    if (err.response?.data?.error?.message) {
-      const raw = String(err.response.data.error.message).slice(0, 200);
-      return raw.replace(/[<>"'`]/g, '').trim() || 'Error al procesar la solicitud.';
-    }
-  }
-  return 'Error al cargar los datos. Por favor intenta más tarde.';
 }
 
 function getInitials(username: string): string {
@@ -92,13 +67,7 @@ const ROLE_LABEL = {
 export default function Profile() {
   const user = useAuthStore((s) => s.user);
   const navigate = useNavigate();
-
-  const [state, setState] = useState<PageState>({
-    modules: [],
-    practiceQueue: [],
-    loading: true,
-    error: null,
-  });
+  const { modules, practiceQueue, loading, error, refresh } = useModules();
 
   useEffect(() => {
     document.title = 'Mi Perfil | API Learning Hub';
@@ -107,46 +76,11 @@ export default function Profile() {
   useEffect(() => {
     if (!user) {
       navigate('/login', { replace: true });
-      return;
     }
-
-    let cancelled = false;
-
-    async function fetchData() {
-      try {
-        const [modulesRes, queueRes] = await Promise.all([
-          apiClient.get<ApiResponse<Module[]>>('/modules'),
-          apiClient
-            .get<ApiResponse<PracticeQueueItem[]>>('/practice/queue')
-            .catch(() => ({ data: { data: [] as PracticeQueueItem[] } })),
-        ]);
-
-        if (cancelled) return;
-
-        setState({
-          modules: modulesRes.data.data,
-          practiceQueue: queueRes.data.data,
-          loading: false,
-          error: null,
-        });
-      } catch (err: unknown) {
-        if (cancelled) return;
-        setState((prev) => ({
-          ...prev,
-          loading: false,
-          error: extractErrorMessage(err),
-        }));
-      }
-    }
-
-    void fetchData();
-    return () => {
-      cancelled = true;
-    };
   }, [user, navigate]);
 
   // ── Render: loading ──
-  if (state.loading) {
+  if (loading) {
     return (
       <main className={styles.page}>
         <div className={styles.center}>
@@ -158,12 +92,12 @@ export default function Profile() {
   }
 
   // ── Render: error ──
-  if (state.error) {
+  if (error) {
     return (
       <main className={styles.page}>
         <div className={styles.center}>
-          <p className={styles.errorText}>{state.error}</p>
-          <Button onClick={() => window.location.reload()} variant="secondary" size="sm">
+          <p className={styles.errorText}>{error}</p>
+          <Button onClick={refresh} variant="secondary" size="sm">
             Reintentar
           </Button>
         </div>
@@ -173,9 +107,9 @@ export default function Profile() {
 
   if (!user) return null;
 
-  const stats = buildStats(state.modules, state.practiceQueue);
+  const stats = buildStats(modules, practiceQueue);
   const initials = getInitials(user.username);
-  const modulesSorted = [...state.modules].sort((a, b) => a.order - b.order);
+  const modulesSorted = [...modules].sort((a, b) => a.order - b.order);
 
   return (
     <main className={styles.page}>
