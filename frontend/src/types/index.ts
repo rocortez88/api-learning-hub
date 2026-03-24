@@ -32,6 +32,12 @@ export interface Lesson {
 export type ExerciseType = 'quiz' | 'observe' | 'fill_blank' | 'build' | 'debug' | 'challenge';
 export type Difficulty = 'easy' | 'medium' | 'hard';
 
+export interface ExerciseValidation {
+  type: string;
+  options?: { key: string; text: string }[];
+  minLength?: number;
+}
+
 export interface Exercise {
   id: string;
   lessonId: string;
@@ -42,6 +48,7 @@ export interface Exercise {
   points: number;
   hints: string[];
   order: number;
+  validation?: ExerciseValidation;
 }
 
 export interface Attempt {

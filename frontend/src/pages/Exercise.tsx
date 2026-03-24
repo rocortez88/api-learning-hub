@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { apiClient } from '../api/client';
-import type { Exercise, Attempt, ApiResponse } from '../types';
+import type { Exercise, ApiResponse } from '../types';
 import { Spinner, Button, Badge } from '../components/ui';
 import { CodeEditor } from '../components/editor';
 import { RequestViewer } from '../components/request-viewer';
@@ -11,7 +11,12 @@ import styles from './Exercise.module.css';
 // ─── Types ─────────────────────────────────────────────────────────────────
 
 interface AttemptResult {
-  attempt: Attempt;
+  attemptId: string;
+  passed: boolean;
+  result: string;
+  points: number;
+  nextReviewAt: string;
+  solution?: string;
   nextExerciseId?: string | null;
 }
 
@@ -77,12 +82,7 @@ function parseObserveData(starterCode: string | null): ObserveData | null {
   if (!starterCode) return null;
   try {
     const parsed: unknown = JSON.parse(starterCode);
-    if (
-      parsed !== null &&
-      typeof parsed === 'object' &&
-      'method' in parsed &&
-      'url' in parsed
-    ) {
+    if (parsed !== null && typeof parsed === 'object' && 'method' in parsed && 'url' in parsed) {
       return parsed as ObserveData;
     }
     return null;
@@ -96,9 +96,7 @@ function parseObserveData(starterCode: string | null): ObserveData | null {
  * Each `___BLANK___` becomes a { blank: true, index } entry.
  * Text between blanks becomes { blank: false, text } entries.
  */
-type FillSegment =
-  | { blank: false; text: string }
-  | { blank: true; index: number };
+type FillSegment = { blank: false; text: string } | { blank: true; index: number };
 
 function parseFillSegments(code: string): FillSegment[] {
   const MARKER = '___BLANK___';
@@ -147,10 +145,15 @@ function extractErrorMessage(err: unknown): string {
 
 // -- Quiz / Theory --
 
+interface QuizOption {
+  key: string;
+  text: string;
+}
+
 interface QuizViewProps {
-  options: string[];
-  selected: string | null;
-  onSelect: (opt: string) => void;
+  options: QuizOption[];
+  selected: string | null; // selected key
+  onSelect: (key: string) => void;
   disabled: boolean;
 }
 
@@ -161,16 +164,16 @@ function QuizView({ options, selected, onSelect, disabled }: QuizViewProps) {
     <div className={styles.quizOptions} role="radiogroup">
       {options.map((opt, i) => (
         <button
-          key={i}
+          key={opt.key}
           type="button"
           role="radio"
-          aria-checked={selected === opt}
+          aria-checked={selected === opt.key}
           disabled={disabled}
-          className={`${styles.quizOption} ${selected === opt ? styles.quizOptionSelected : ''}`}
-          onClick={() => onSelect(opt)}
+          className={`${styles.quizOption} ${selected === opt.key ? styles.quizOptionSelected : ''}`}
+          onClick={() => onSelect(opt.key)}
         >
           <span className={styles.optionLetter}>{LETTERS[i] ?? String(i + 1)}</span>
-          {opt}
+          {opt.text}
         </button>
       ))}
     </div>
@@ -196,9 +199,7 @@ function ObserveView({ data, answer, onAnswerChange, disabled }: ObserveViewProp
         responseStatus={data.responseStatus}
         responseBody={data.responseBody}
       />
-      {data.question && (
-        <p className={styles.observeQuestion}>{data.question}</p>
-      )}
+      {data.question && <p className={styles.observeQuestion}>{data.question}</p>}
       <textarea
         className={styles.observeTextarea}
         value={answer}
@@ -256,12 +257,7 @@ interface CodeEditorViewProps {
 function CodeEditorView({ code, onCodeChange, disabled }: CodeEditorViewProps) {
   return (
     <div className={styles.editorWrapper}>
-      <CodeEditor
-        value={code}
-        onChange={onCodeChange}
-        readOnly={disabled}
-        height="360px"
-      />
+      <CodeEditor value={code} onChange={onCodeChange} readOnly={disabled} height="360px" />
     </div>
   );
 }
@@ -269,7 +265,7 @@ function CodeEditorView({ code, onCodeChange, disabled }: CodeEditorViewProps) {
 // ─── Main Component ────────────────────────────────────────────────────────
 
 export default function ExercisePage() {
-  const { exerciseId } = useParams<{ exerciseId: string }>();
+  const { exerciseId, lessonId } = useParams<{ exerciseId?: string; lessonId?: string }>();
   const navigate = useNavigate();
 
   // Page data
@@ -302,8 +298,8 @@ export default function ExercisePage() {
 
   // ── Load exercise ──
   useEffect(() => {
-    if (!exerciseId || !/^\d+$/.test(exerciseId)) {
-      setState(prev => ({ ...prev, loading: false, error: 'Ejercicio no encontrado.' }));
+    if (!exerciseId && !lessonId) {
+      setState((prev) => ({ ...prev, loading: false, error: 'Ejercicio no encontrado.' }));
       return;
     }
 
@@ -321,10 +317,29 @@ export default function ExercisePage() {
 
     async function fetchExercise() {
       try {
-        const res = await apiClient.get<ApiResponse<Exercise>>(`/exercises/${exerciseId}`);
-        if (cancelled) return;
+        let ex: Exercise;
 
-        const ex = res.data.data;
+        if (exerciseId) {
+          const res = await apiClient.get<ApiResponse<Exercise>>(`/exercises/${exerciseId}`);
+          ex = res.data.data;
+        } else {
+          // Viene de /modules/:slug/lessons/:lessonId — carga el primer ejercicio
+          const res = await apiClient.get<ApiResponse<Exercise[]>>(
+            `/exercises/lessons/${lessonId}`,
+          );
+          const list = res.data.data;
+          if (!list.length) {
+            setState({
+              exercise: null,
+              loading: false,
+              error: 'Esta lección no tiene ejercicios aún.',
+            });
+            return;
+          }
+          ex = list[0] as Exercise;
+        }
+
+        if (cancelled) return;
         setState({ exercise: ex, loading: false, error: null });
 
         // Pre-populate editor with starterCode for build/debug types
@@ -334,7 +349,7 @@ export default function ExercisePage() {
         }
 
         // Pre-populate fill_blank answer slots
-        if ((type === 'fill_blank' || type === 'fill-in' as string) && ex.starterCode) {
+        if ((type === 'fill_blank' || type === ('fill-in' as string)) && ex.starterCode) {
           const blanksCount = (ex.starterCode.match(/___BLANK___/g) ?? []).length;
           setFillAnswers(Array(blanksCount).fill(''));
         }
@@ -345,8 +360,10 @@ export default function ExercisePage() {
     }
 
     void fetchExercise();
-    return () => { cancelled = true; };
-  }, [exerciseId]);
+    return () => {
+      cancelled = true;
+    };
+  }, [exerciseId, lessonId]);
 
   // ── Derive fill segments (memoised by exercise id, not React.useMemo to keep it simple) ──
   const fillSegments: FillSegment[] = (() => {
@@ -363,7 +380,7 @@ export default function ExercisePage() {
     if (!state.exercise) return '';
     const type = state.exercise.type;
 
-    if (type === 'quiz' || type === 'theory' as string) {
+    if (type === 'quiz' || type === ('theory' as string)) {
       return quizSelected ?? '';
     }
     if (type === 'observe') {
@@ -377,7 +394,7 @@ export default function ExercisePage() {
   }
 
   function canSubmit(): boolean {
-    if (submitting || result?.attempt.passed) return false;
+    if (submitting || result?.passed) return false;
     const type = state.exercise?.type;
     if (type === 'quiz' || type === ('theory' as string)) return quizSelected !== null;
     if (type === 'observe') return observeAnswer.trim().length > 0;
@@ -464,11 +481,14 @@ export default function ExercisePage() {
   if (!ex) return null;
 
   const isSubmitted = result !== null;
-  const passed = result?.attempt.passed ?? false;
+  const passed = result?.passed ?? false;
   const interactionDisabled = submitting || (isSubmitted && passed);
 
   // Derived values per exercise type
-  const quizOptions = parseQuizOptions(ex.starterCode);
+  // Quiz options come from validation.options (backend strips the answer key)
+  const quizOptions: { key: string; text: string }[] =
+    ex.validation?.options ??
+    parseQuizOptions(ex.starterCode).map((text, i) => ({ key: String(i), text }));
   const observeData = parseObserveData(ex.starterCode);
 
   return (
@@ -515,9 +535,7 @@ export default function ExercisePage() {
             ) : (
               // Fallback: starterCode is not parseable JSON — show raw and a textarea
               <div className={styles.observeSection}>
-                {ex.starterCode && (
-                  <pre className={styles.fillCode}>{ex.starterCode}</pre>
-                )}
+                {ex.starterCode && <pre className={styles.fillCode}>{ex.starterCode}</pre>}
                 <p className={styles.observeQuestion}>Escribe tu análisis:</p>
                 <textarea
                   className={styles.observeTextarea}
@@ -563,12 +581,7 @@ export default function ExercisePage() {
       {!isSubmitted || !passed ? (
         <div className={styles.actionsBar}>
           {revealedHints < ex.hints.length && !isSubmitted && (
-            <Button
-              variant="secondary"
-              size="sm"
-              onClick={handleRevealHint}
-              disabled={submitting}
-            >
+            <Button variant="secondary" size="sm" onClick={handleRevealHint} disabled={submitting}>
               Ver pista {revealedHints + 1}/{ex.hints.length}
             </Button>
           )}
@@ -597,22 +610,20 @@ export default function ExercisePage() {
           role="status"
           aria-live="polite"
         >
-          <p className={`${styles.resultTitle} ${passed ? styles.resultTitlePass : styles.resultTitleFail}`}>
+          <p
+            className={`${styles.resultTitle} ${passed ? styles.resultTitlePass : styles.resultTitleFail}`}
+          >
             {passed ? '¡Correcto!' : 'Incorrecto'}
           </p>
-          {result?.attempt.result && (
-            <p className={styles.resultMessage}>{result.attempt.result}</p>
-          )}
-          {passed && (
-            <p className={styles.resultPoints}>+{ex.points} puntos</p>
-          )}
+          {result?.result && <p className={styles.resultMessage}>{result.result}</p>}
+          {passed && <p className={styles.resultPoints}>+{ex.points} puntos</p>}
           <div className={styles.resultActions}>
             {passed && result?.nextExerciseId && (
               <Button
                 variant="primary"
                 size="md"
                 onClick={() => {
-                  if (result.nextExerciseId && /^\d+$/.test(String(result.nextExerciseId))) {
+                  if (result.nextExerciseId) {
                     navigate(`/exercises/${result.nextExerciseId}`);
                   } else {
                     navigate(-1);

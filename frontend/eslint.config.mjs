@@ -23,6 +23,9 @@ export default tseslint.config(
     rules: {
       // React
       ...reactHooks.configs.recommended.rules,
+      // Desactivado: la regla v7 bloquea setLoading(true) antes de fetches async,
+      // patrón válido en este proyecto. La alternativa requeriría useReducer global.
+      'react-hooks/set-state-in-effect': 'off',
       'react-refresh/only-export-components': ['warn', { allowConstantExport: true }],
 
       // TypeScript

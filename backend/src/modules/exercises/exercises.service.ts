@@ -1,4 +1,4 @@
-import { eq } from 'drizzle-orm';
+import { eq, asc } from 'drizzle-orm';
 import { db } from '../../db/index.js';
 import { exercises } from '../../db/schema.js';
 import { AppError } from '../../middleware/errorHandler.js';
@@ -58,11 +58,7 @@ function extractPublicValidation(
  * Throws AppError 404 if the exercise does not exist.
  */
 export function getExerciseById(id: string) {
-  const exercise = db
-    .select()
-    .from(exercises)
-    .where(eq(exercises.id, id))
-    .get();
+  const exercise = db.select().from(exercises).where(eq(exercises.id, id)).get();
 
   if (!exercise) {
     throw new AppError(404, 'Ejercicio no encontrado', 'EXERCISE_NOT_FOUND');
@@ -74,22 +70,61 @@ export function getExerciseById(id: string) {
     const parsed = JSON.parse(exercise.hintsJson);
     hints = Array.isArray(parsed) ? parsed : [];
   } catch {
-    hints = [];
+    // hints stays []
   }
 
   const validation = extractPublicValidation(exercise.type, exercise.validationLogic);
 
   return {
-    id:          exercise.id,
-    lessonId:    exercise.lessonId,
-    type:        exercise.type,
-    prompt:      exercise.prompt,
+    id: exercise.id,
+    lessonId: exercise.lessonId,
+    type: exercise.type,
+    prompt: exercise.prompt,
     starterCode: exercise.starterCode,
-    difficulty:  exercise.difficulty,
-    points:      exercise.points,
-    order:       exercise.order,
-    createdAt:   exercise.createdAt,
+    difficulty: exercise.difficulty,
+    points: exercise.points,
+    order: exercise.order,
+    createdAt: exercise.createdAt,
     hints,
     validation,
   };
+}
+
+/**
+ * Returns all exercises for a lesson, ordered by `order`.
+ * Only exposes public-safe fields (no solution, no raw validationLogic).
+ */
+export function getExercisesByLesson(lessonId: string) {
+  const rows = db
+    .select()
+    .from(exercises)
+    .where(eq(exercises.lessonId, lessonId))
+    .orderBy(asc(exercises.order))
+    .all();
+
+  return rows.map((exercise) => {
+    let hints: unknown[] = [];
+    try {
+      const parsed = JSON.parse(exercise.hintsJson);
+      hints = Array.isArray(parsed) ? parsed : [];
+    } catch {
+      // hints stays []
+    }
+
+    const validation = extractPublicValidation(exercise.type, exercise.validationLogic);
+
+    return {
+      id: exercise.id,
+      lessonId: exercise.lessonId,
+      type: exercise.type,
+      prompt: exercise.prompt,
+      starterCode: exercise.starterCode,
+      difficulty: exercise.difficulty,
+      points: exercise.points,
+      order: exercise.order,
+      createdAt: exercise.createdAt,
+      hints,
+      validation,
+    };
+  });
 }

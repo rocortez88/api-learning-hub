@@ -3,7 +3,7 @@ import type { Request, Response, NextFunction } from 'express';
 import { requireAuth } from '../../middleware/auth.js';
 import { validate } from '../../middleware/validate.js';
 import * as exercisesService from './exercises.service.js';
-import { exerciseParamsSchema } from './exercises.schema.js';
+import { exerciseParamsSchema, lessonParamsSchema } from './exercises.schema.js';
 
 export const exercisesRouter = Router();
 
@@ -95,6 +95,21 @@ export const exercisesRouter = Router();
  *             schema:
  *               $ref: '#/components/schemas/Error'
  */
+/** GET /lessons/:lessonId/exercises — ejercicios de una lección, ordenados */
+exercisesRouter.get(
+  '/lessons/:lessonId',
+  requireAuth,
+  validate(lessonParamsSchema, 'params'),
+  (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const data = exercisesService.getExercisesByLesson(req.params['lessonId'] ?? '');
+      res.status(200).json({ data });
+    } catch (err) {
+      next(err);
+    }
+  },
+);
+
 exercisesRouter.get(
   '/:id',
   requireAuth,

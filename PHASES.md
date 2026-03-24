@@ -37,13 +37,13 @@
 
 - [x] 4a. Ejecutar `npm test` y verificar que todos los tests pasan (46/46 ✓, 3 skipped)
 - [x] 4b. Verificar cobertura ≥ 80% (91.16% ✓)
-- [ ] 4c. Agregar unit tests básicos para servicios críticos (auth, practice, exercises)
+- [x] 4c. Agregar unit tests básicos para servicios críticos (auth, practice, exercises) — 31 unit tests nuevos (14 auth + 8 exercises + 9 practice), total 77/77 ✓
 
 ## Fase 5 — Verificación Final
 
-- [ ] 5a. `npm run check` pasa en raíz (lint + typecheck + tests)
-- [ ] 5b. E2E Playwright: 8/8 pasan
-- [ ] 5c. Build de producción sin errores (`npm run build`)
+- [x] 5a. `npm run check` pasa en raíz (lint + typecheck + tests) — 0 errores, solo warnings esperados
+- [x] 5b. E2E Playwright: 8/8 pasan
+- [x] 5c. Build de producción sin errores (`npm run build`)
 - [ ] 5d. App funcional end-to-end: registro → login → módulos → ejercicio
 
 ---

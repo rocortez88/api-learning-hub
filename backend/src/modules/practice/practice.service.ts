@@ -51,12 +51,7 @@ export function getPracticeQueue(userId: string): PracticeQueue {
     })
     .from(spacedRepetition)
     .innerJoin(exercises, eq(spacedRepetition.exerciseId, exercises.id))
-    .where(
-      and(
-        eq(spacedRepetition.userId, userId),
-        lte(spacedRepetition.nextReviewAt, now),
-      ),
-    )
+    .where(and(eq(spacedRepetition.userId, userId), lte(spacedRepetition.nextReviewAt, now)))
     .orderBy(asc(spacedRepetition.nextReviewAt))
     .limit(10)
     .all();
@@ -68,7 +63,7 @@ export function getPracticeQueue(userId: string): PracticeQueue {
     try {
       hints = JSON.parse(hintsJson) as string[];
     } catch {
-      hints = [];
+      // hints stays []
     }
 
     return {
@@ -93,10 +88,7 @@ export function getPracticeQueue(userId: string): PracticeQueue {
   return { data, total: data.length };
 }
 
-export function getReviewItems(
-  userId: string,
-  query: ReviewItemsQuery,
-): PracticeQueue {
+export function getReviewItems(userId: string, query: ReviewItemsQuery): PracticeQueue {
   const now = new Date().toISOString();
   const limit = query.limit;
 
@@ -125,10 +117,7 @@ export function getReviewItems(
             lte(spacedRepetition.nextReviewAt, now),
             eq(spacedRepetition.exerciseId, query.exerciseId),
           )
-        : and(
-            eq(spacedRepetition.userId, userId),
-            lte(spacedRepetition.nextReviewAt, now),
-          ),
+        : and(eq(spacedRepetition.userId, userId), lte(spacedRepetition.nextReviewAt, now)),
     )
     .orderBy(asc(spacedRepetition.nextReviewAt))
     .limit(limit)
@@ -141,7 +130,7 @@ export function getReviewItems(
     try {
       hints = JSON.parse(hintsJson) as string[];
     } catch {
-      hints = [];
+      // hints stays []
     }
 
     return {
